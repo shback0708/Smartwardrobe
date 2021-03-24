@@ -1,0 +1,60 @@
+item {
+    name: "long_sleeved_dress",
+    id: 1,
+    display_name: "long_sleeved_dress"
+}
+item {
+    name: "long_sleeved_outwear",
+    id: 2,
+    display_name: "long_sleeved_outwear"
+}
+item {
+    name: "long_sleeved_shirt",
+    id: 3,
+    display_name: "long_sleeved_shirt"
+}
+item {
+    name: "short_sleeved_dress",
+    id: 4,
+    display_name: "short_sleeved_dress"
+}
+item {
+    name: "short_sleeved_outwear",
+    id: 5,
+    display_name: "short_sleeved_outwear"
+}
+item {
+    name: "short_sleeved_shirt",
+    id: 6,
+    display_name: "short_sleeved_shirt"
+}
+item {
+    name: "shorts",
+    id: 7,
+    display_name: "shorts"
+}
+item {
+    name: "skirt",
+    id: 8,
+    display_name: "skirt"
+}
+item {
+    name: "sling_dress",
+    id: 9,
+    display_name: "sling_dress"
+}
+item {
+    name: "trousers",
+    id: 10,
+    display_name: "trousers"
+}
+item {
+    name: "vest",
+    id: 11,
+    display_name: "vest"
+}
+item {
+    name: "vest_dress",
+    id: 12,
+    display_name: "vest_dress"
+}
