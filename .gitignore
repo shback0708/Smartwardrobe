@@ -1,0 +1,10 @@
+clothing_recognition/classifier/logs/*
+clothing_recognition/classifier/data/*
+clothing_Recognition/detector/train/*
+*.pbtxt
+*.record-*
+*.png
+*.jpeg
+*.jpg
+*.zip
+training/*
