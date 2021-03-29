@@ -1,4 +1,9 @@
 # This will be the stub file for retreiver model
+angle = 0
+
+# updates the global variable angle 
+def updateAngle(a) -> None:
+    global
 
 # user request, which is going to be the clothes ID
 def userRequest(a:int) -> int:
