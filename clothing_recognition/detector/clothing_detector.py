@@ -18,14 +18,14 @@ from object_detection.builders import model_builder
 
 import pathlib
 
-pipeline_file = 'pipeline_file.config'
+pipeline_file = os.path.join(os.path.dirname(__file__),'pipeline_file.config')
 physical_devices = tf.config.list_physical_devices('GPU') 
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
-filenames = list(pathlib.Path('models/').glob('*.index'))
+filenames = list(pathlib.Path(os.path.join(os.path.dirname(__file__),'models/')).glob('*.index'))
 filenames.sort()
 
-def get_model_detection_function(model):
+def  get_model_detection_function(model):
   """Get a tf.function for detection."""
 
   @tf.function
@@ -72,11 +72,11 @@ class ClothingDetector:
 
         print(detections, predictions_dict, shapes)
 
-        #TODO (Henry): add classifier, visualization code for now
+        #TODO (Henry): visualization code for now
         configs = config_util.get_configs_from_pipeline_file(self.pipeline_config)
         #map labels for inference decoding
         label_map_path = configs['eval_input_config'].label_map_path
-        label_map = label_map_util.load_labelmap(label_map_path)
+        label_map = label_map_util.load_labelmap(os.path.join(os.path.dirname(__file__),label_map_path))
         categories = label_map_util.convert_label_map_to_categories(
             label_map,
             max_num_classes=label_map_util.get_max_label_map_index(label_map),
@@ -93,13 +93,13 @@ class ClothingDetector:
             category_index,
             use_normalized_coordinates=True,
             max_boxes_to_draw=8,
-            min_score_thresh=0.3,
+            min_score_thresh=0.4,
             agnostic_mode=False,
         )
         plt.figure(figsize=(12,16))
         plt.imshow(image_np_with_detections)
-        plt.savefig('test.png')
-        return None
+        plt.savefig('res.png')
+        return detections, category_index
 
 
 if __name__ == '__main__':

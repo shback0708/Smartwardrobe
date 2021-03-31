@@ -7,3 +7,5 @@ tensorflow2 object detection api
 https://tensorflow-object-detection-api-tutorial.readthedocs.io/en/latest/install.html
 
 pip install scikit-image
+
+pip install colorthief

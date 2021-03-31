@@ -31,7 +31,7 @@ else:
     print("no model found")
     quit()
 
-def predict_image(img_path, class_lookup):
+def predict_image(img_path):
     # Read the image and resize it
     img = image.load_img(img_path, target_size=(height, width))
     # Convert it to a Numpy array with target shape.
@@ -48,4 +48,4 @@ def predict_image(img_path, class_lookup):
 
 if __name__ == '__main__':
     print(random_test_image)
-    print(predict_image(random_test_image, class_lookup))
+    print(predict_image(random_test_image))
