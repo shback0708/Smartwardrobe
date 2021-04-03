@@ -19,7 +19,7 @@ from skimage.io import imread
 import matplotlib.pyplot as plt
 from IPython.display import Image
 import random
-
+import time
 # Options: EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
 # Higher the number, the more complex the model is.
 
@@ -43,7 +43,12 @@ conv_base = Net.EfficientNetB0(weights='imagenet', include_top=False, input_shap
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-train_datagen = ImageDataGenerator(rescale=1.0 / 255, preprocessing_function=Net.preprocess_input)
+train_datagen = ImageDataGenerator(rescale=1.0 / 255, 
+                                   rotation_range=30, 
+                                   brightness_range=[0.8,1.2], 
+                                   width_shift_range=[-0.1,0.1],
+                                   height_shift_range=[-0.1,0.1],
+                                   preprocessing_function=Net.preprocess_input)
 
 test_datagen = ImageDataGenerator(rescale=1.0 / 255, preprocessing_function=Net.preprocess_input)
 
@@ -59,12 +64,12 @@ train_generator = train_datagen.flow_from_directory(
 validation_generator = test_datagen.flow_from_directory(
         valid_dir,
         target_size=(height, width),
-        batch_size=batch_size,
+        batch_size=1,
         class_mode='categorical')
 
 print(train_generator.class_indices)
-
 epochs = 20
+finetuning_epochs = 10
 
 NUM_TRAIN = sum([len(files) for r, d, files in os.walk(train_dir)])
 NUM_TEST = sum([len(files) for r, d, files in os.walk(valid_dir)])
@@ -85,10 +90,25 @@ if latest_subdir is not None:
     print("loaded model:", latest_subdir)
     initial_epoch = int(latest_subdir[-3:])
     print("initial_epoch:", initial_epoch)
+    for layer in model.layers[:-3]:
+        print(layer.name)
+        layer.trainable = False
+    #recompile for fine tuning
+    # if initial_epoch == epochs:
+    #     for layer in model.layers[:-3]:
+    #     print(layer.name)
+    #     layer.trainable = False
+        
+    #     print("recompile for finetuning...")
+    #     time.sleep(4)
+    #     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-6)
+    #     model.compile(
+    #         optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+    #     )
 else:
     model = models.Sequential()
     model.add(conv_base)
-    model.add(layers.GlobalMaxPooling2D(name="gap"))
+    model.add(layers.GlobalMaxPooling2D(name="max_pool"))
     model.add(layers.BatchNormalization())
     # model.add(layers.Flatten(name="flatten"))
     if dropout_rate > 0:
@@ -96,23 +116,29 @@ else:
     # model.add(layers.Dense(256, activation='relu', name="fc1"))
     model.add(layers.Dense(num_classes, activation='softmax', name="fc_out"))
 
+    print('This is the number of trainable layers '
+      'before freezing the conv base:', len(model.trainable_weights))
+    for layer in model.layers[:-3]:
+        print(layer.name)
+        layer.trainable = False
+    print('This is the number of trainable layers '
+      'after freezing the conv base:', len(model.trainable_weights))
+
+    def get_lr_metric(optimizer):
+        def lr(y_true, y_pred):
+            return optimizer._decayed_lr(tf.float32)
+        return lr
+
     optimizer = tf.keras.optimizers.Adam()
+    lr_metric = get_lr_metric(optimizer)
+
     model.compile(
-        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy", lr_metric]
     )
 
 model.summary()
 
-print('This is the number of trainable layers '
-      'before freezing the conv base:', len(model.trainable_weights))
-
-#freeze all but last three
-for layer in model.layers[:-3]:
-    print(layer.name)
-    layer.trainable = False
-
-print('This is the number of trainable layers '
-      'after freezing the conv base:', len(model.trainable_weights))
+print('This is the number of trainable layers ', len(model.trainable_weights))
 
 
 filepath= model_dir + "/{epoch:03d}"
@@ -120,10 +146,11 @@ checkpoint = ModelCheckpoint(filepath, save_weights_only=False)
 tensorboard_callback = TensorBoard(log_dir="./logs", update_freq=1000)
 
 if __name__ == '__main__':
+
     history = model.fit(
         train_generator,
         steps_per_epoch= NUM_TRAIN / batch_size,
-        epochs=epochs,
+        epochs=epochs+finetuning_epochs,
         callbacks=[checkpoint, tensorboard_callback],
         validation_data=validation_generator,
         validation_steps=NUM_TEST / batch_size,

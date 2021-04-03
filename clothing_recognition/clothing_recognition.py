@@ -37,7 +37,7 @@ class ClothingRecognitionModel:
             print(dimensions)
             cropped_img = image.crop(dimensions)
             cropped_img.save('cropped' + str(i) + '.png')
-            predicted_class, probability = self.classifier.getAttributes(cropped_img)
+            predicted_class, probability, color = self.classifier.getAttributes(cropped_img)
             print("detector prediction:", c_index[classes[i]], "classifier predicion:", predicted_class)
             print("detector acc:", scores[i], "classifier acc:", probability)
 if __name__ == '__main__':

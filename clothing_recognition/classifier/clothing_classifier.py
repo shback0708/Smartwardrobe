@@ -6,7 +6,7 @@ import random
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras import models
 import numpy as np
-from six import BytesIO as io
+from six import BytesIO
 # from PIL import Image
 import os
 from PIL import Image as pilimage
@@ -14,7 +14,8 @@ from PIL import Image as pilimage
 from colorthief import ColorThief
 
 model_dir = "data/models/"
-class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
+#TODO: this might not be everything
+class_lookup = ['Anorak', 'Blazer', 'Blouse', 'Bomber', 'Button-Down', 'Caftan', 'Capris', 'Cardigan', 'Chinos', 'Coat', 'Coverup', 'Culottes', 'Cutoffs', 'Dress', 'Flannel', 'Gauchos', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jeans', 'Jeggings', 'Jersey', 'Jodhpurs', 'Joggers', 'Jumpsuit', 'Kaftan', 'Kimono', 'Leggings', 'Onesie', 'Parka', 'Peacoat', 'Poncho', 'Robe', 'Romper', 'Sarong', 'Shorts', 'Skirt', 'Sweater', 'Sweatpants', 'Sweatshorts', 'Tank', 'Tee', 'Top', 'Trunks', 'Turtleneck']
 height,width = 224,224
 
 class ClothingClassifier:
@@ -47,6 +48,7 @@ class ClothingClassifier:
         top3 = np.argpartition(result_verbose[0], -3)[-3:]
         print(top3)
         for i in range(3):
+            print(len(class_lookup))
             predicted_class = class_lookup[top3[i]]
             predicted_probability = result_verbose[0][top3[i]]
             print(predicted_class, predicted_probability)
@@ -54,8 +56,8 @@ class ClothingClassifier:
         predicted_probability = result_verbose[0][np.argmax(result_verbose, axis=1)[0]]
 
         # Get color
-        imgfile = io.BytesIO()
-        img.save(imgfile, 'format=jpg')
+        imgfile = BytesIO()
+        img.save(imgfile, format='jpeg')
         cf = ColorThief(imgfile)
         color = cf.get_color()
         print(color)
@@ -63,15 +65,15 @@ class ClothingClassifier:
 
 if __name__ == '__main__':
     cc = ClothingClassifier()
-    test_dir = "data/test/"
+    test_dir = "data/train/"
     test_dir = os.path.join(os.path.dirname(__file__),test_dir)
     test_imgs = []
     for path, subdirs, files in os.walk(test_dir):
         for name in files:
             test_imgs.append(os.path.join(path, name))
     random_test_image = random.choice(test_imgs)
-    img_data = tf.io.gfile.GFile(random_test_image, 'rb').read()
-    image = pilimage.open(io.BytesIO(img_data))
+    #img_data = tf.io.gfile.GFile(random_test_image, 'rb').read()
+    img = pilimage.open(random_test_image)
     print(random_test_image)
-    cc.getAttributes(image)
+    cc.getAttributes(img)
     print("test completed.")
