@@ -3,7 +3,7 @@
 from time import sleep
 import serial
 # This function will be imported from retriever.py
-from retriever import 
+#from retriever import 
 # def servo_control():
 #     board = Arduino('COM4')
 #     pin_9 = board.get_pin('d:9:p') # pwm pin
@@ -46,13 +46,13 @@ serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
 serialcomm.timeout = 1
 
 while True:
-    #i = input("input(open/close): ").strip()
-    #if i == "done":
-    #    print ("finished program")
-    #    break
-    #serialcomm.write(i.encode())
+    i = input("input the desired angle: ").strip()
+    if i == "done":
+       print ("finished program")
+       break
+    serialcomm.write(i.encode())
 
-    angle = getAngle()
-    serialcomm.write(angle)
+    #angle = getAngle()
+    #serialcomm.write(angle)
     
 serialcomm.close()
