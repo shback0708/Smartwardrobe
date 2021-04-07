@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 from IPython.display import Image
 import random
 import time
+from matplotlib import pyplot as plt
 # Options: EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
 # Higher the number, the more complex the model is.
 
@@ -27,8 +28,8 @@ import time
 #EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
 import tensorflow.keras.applications.efficientnet as Net
 
-height = 224
-width = 224
+height = 240
+width = 240
 input_shape = (height, width, 3)
 
 train_dir = "data/train/"
@@ -36,18 +37,18 @@ valid_dir = "data/validate/"
 test_dir = "data/test/"
 model_dir = "data/models/"
 
-batch_size = 4
-
-conv_base = Net.EfficientNetB0(weights='imagenet', include_top=False, input_shape=input_shape)
-
+batch_size = 16
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 train_datagen = ImageDataGenerator(rescale=1.0 / 255, 
-                                   rotation_range=30, 
+                                   rotation_range=15,
                                    brightness_range=[0.8,1.2], 
                                    width_shift_range=[-0.1,0.1],
                                    height_shift_range=[-0.1,0.1],
+                                   horizontal_flip=True,
+                                   shear_range=0.1, 
+                                   zoom_range=0.1,
                                    preprocessing_function=Net.preprocess_input)
 
 test_datagen = ImageDataGenerator(rescale=1.0 / 255, preprocessing_function=Net.preprocess_input)
@@ -60,16 +61,22 @@ train_generator = train_datagen.flow_from_directory(
         batch_size=batch_size,
         # Since we use categorical_crossentropy loss, we need categorical labels
         class_mode='categorical')
+x_batch, y_batch = train_generator.next()
+for i in range(0,1):
+    image = x_batch[i]
+    plt.imshow(image)
+    plt.savefig('foo.png')
+
 
 validation_generator = test_datagen.flow_from_directory(
         valid_dir,
         target_size=(height, width),
-        batch_size=1,
+        batch_size=batch_size,
         class_mode='categorical')
 
 print(train_generator.class_indices)
-epochs = 20
-finetuning_epochs = 10
+epochs = 9
+finetuning_epochs = 3
 
 NUM_TRAIN = sum([len(files) for r, d, files in os.walk(train_dir)])
 NUM_TEST = sum([len(files) for r, d, files in os.walk(valid_dir)])
@@ -86,13 +93,36 @@ print(all_subdirs)
 initial_epoch = 0
 latest_subdir = max(all_subdirs, key=os.path.getmtime, default=None)
 if latest_subdir is not None:
-    model = models.load_model(latest_subdir)
+    def get_lr_metric(optimizer):
+        def lr(y_true, y_pred):
+            return optimizer._decayed_lr(tf.float32)
+        return lr
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+    lr_metric = get_lr_metric(optimizer)
+
+    model = models.load_model(latest_subdir, custom_objects={'lr':lr_metric})
     print("loaded model:", latest_subdir)
     initial_epoch = int(latest_subdir[-3:])
     print("initial_epoch:", initial_epoch)
-    for layer in model.layers[:-3]:
-        print(layer.name)
-        layer.trainable = False
+    if initial_epoch < epochs:
+        for layer in model.layers[:-3]:
+            print(layer.name)
+            layer.trainable = False
+        optimizer = model.optimizer
+
+    else:
+        for layer in model.layers[-20:]:
+            if not isinstance(layer, layers.BatchNormalization):
+                layer.trainable = True
+        optimizer = model.optimizer
+        # optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+    #model.optimizer.learning_rate = 1e-3
+
+    lr_metric = get_lr_metric(optimizer)
+
+    model.compile(
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy", lr_metric]
+    )
     #recompile for fine tuning
     # if initial_epoch == epochs:
     #     for layer in model.layers[:-3]:
@@ -106,6 +136,7 @@ if latest_subdir is not None:
     #         optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
     #     )
 else:
+    conv_base = Net.EfficientNetB1(weights='imagenet', include_top=False, input_shape=input_shape)
     model = models.Sequential()
     model.add(conv_base)
     model.add(layers.GlobalMaxPooling2D(name="max_pool"))
@@ -129,7 +160,7 @@ else:
             return optimizer._decayed_lr(tf.float32)
         return lr
 
-    optimizer = tf.keras.optimizers.Adam()
+    optimizer = tf.keras.optimizers.Adam(learning_rate=5e-3)
     lr_metric = get_lr_metric(optimizer)
 
     model.compile(

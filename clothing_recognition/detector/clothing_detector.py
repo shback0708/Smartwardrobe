@@ -69,9 +69,6 @@ class ClothingDetector:
             np.expand_dims(image_np, 0), dtype=tf.float32)
         
         detections, predictions_dict, shapes = self.detect_fn(input_tensor)
-
-        print(detections, predictions_dict, shapes)
-
         #TODO (Henry): visualization code for now
         configs = config_util.get_configs_from_pipeline_file(self.pipeline_config)
         #map labels for inference decoding

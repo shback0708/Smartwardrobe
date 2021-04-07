@@ -33,15 +33,14 @@ class ClothingRecognitionModel:
                           min(ymin * im_height, im_height),
                           min(xmax * im_width, im_width), 
                           min(ymax * im_height, im_height))
-            print(image.size)
-            print(dimensions)
             cropped_img = image.crop(dimensions)
             cropped_img.save('cropped' + str(i) + '.png')
             predicted_class, probability, color = self.classifier.getAttributes(cropped_img)
-            print("detector prediction:", c_index[classes[i]], "classifier predicion:", predicted_class)
+            print("detector prediction:", c_index[classes[i]+1], "classifier predicion:", predicted_class)
             print("detector acc:", scores[i], "classifier acc:", probability)
+            print("color: ", color)
 if __name__ == '__main__':
     crm = ClothingRecognitionModel()
-    image = Image.open('c:/Users/linhe/OneDrive/Documents/GitHub/Smartwardrobe/clothing_recognition/classifier/data/test/Jacket/00011117.jpg').convert("RGB")
+    image = Image.open('test.jpg').convert("RGB")
     crm.getLabels(image)
     print("test completed.")

@@ -16,7 +16,7 @@ from colorthief import ColorThief
 model_dir = "data/models/"
 #TODO: this might not be everything
 class_lookup = ['Anorak', 'Blazer', 'Blouse', 'Bomber', 'Button-Down', 'Caftan', 'Capris', 'Cardigan', 'Chinos', 'Coat', 'Coverup', 'Culottes', 'Cutoffs', 'Dress', 'Flannel', 'Gauchos', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jeans', 'Jeggings', 'Jersey', 'Jodhpurs', 'Joggers', 'Jumpsuit', 'Kaftan', 'Kimono', 'Leggings', 'Onesie', 'Parka', 'Peacoat', 'Poncho', 'Robe', 'Romper', 'Sarong', 'Shorts', 'Skirt', 'Sweater', 'Sweatpants', 'Sweatshorts', 'Tank', 'Tee', 'Top', 'Trunks', 'Turtleneck']
-height,width = 224,224
+height,width = 240,240
 
 class ClothingClassifier:
     model = None
@@ -29,7 +29,7 @@ class ClothingClassifier:
 
         latest_subdir = max(all_subdirs, key=os.path.getmtime, default=None)
         if latest_subdir is not None:
-            self.model = models.load_model(latest_subdir)
+            self.model = models.load_model(latest_subdir, compile=False)
         else:
             print("no model found")
             quit()
@@ -44,36 +44,48 @@ class ClothingClassifier:
         x = x.reshape((1,) + x.shape)
         x /= 255.
         result_verbose = self.model.predict([x])
-        print(result_verbose)
         top3 = np.argpartition(result_verbose[0], -3)[-3:]
-        print(top3)
+        predicted_classes = []
+        predicted_probabilities = []
         for i in range(3):
             print(len(class_lookup))
-            predicted_class = class_lookup[top3[i]]
-            predicted_probability = result_verbose[0][top3[i]]
-            print(predicted_class, predicted_probability)
-        predicted_class = class_lookup[np.argmax(result_verbose, axis=1)[0]]
-        predicted_probability = result_verbose[0][np.argmax(result_verbose, axis=1)[0]]
+            predicted_classes.append(class_lookup[top3[i]])
+            predicted_probabilities.append(result_verbose[0][top3[i]])
+        # print(predicted_classes, predicted_probability)
+        # predicted_class = class_lookup[np.argmax(result_verbose, axis=1)[0]]
+        # predicted_probability = result_verbose[0][np.argmax(result_verbose, axis=1)[0]]
 
         # Get color
         imgfile = BytesIO()
         img.save(imgfile, format='jpeg')
         cf = ColorThief(imgfile)
         color = cf.get_color()
-        print(color)
-        return predicted_class, predicted_probability, color
+        # print(color)
+        return predicted_classes, predicted_probabilities, color
 
 if __name__ == '__main__':
     cc = ClothingClassifier()
-    test_dir = "data/train/"
+    test_dir = "data/test/"
     test_dir = os.path.join(os.path.dirname(__file__),test_dir)
     test_imgs = []
+    total = 0
+    correct = 0
     for path, subdirs, files in os.walk(test_dir):
+        category = path[-10:]
+        print("path", path)
         for name in files:
-            test_imgs.append(os.path.join(path, name))
+            filepath = os.path.join(path, name)
+            test_imgs.append(filepath)
+            img = pilimage.open(filepath)
+            predicted_classes, predicted_probabilities, color = cc.getAttributes(img)
+            total += 1
+            if category in predicted_classes:
+                correct += 1
+
+
     random_test_image = random.choice(test_imgs)
     #img_data = tf.io.gfile.GFile(random_test_image, 'rb').read()
     img = pilimage.open(random_test_image)
     print(random_test_image)
     cc.getAttributes(img)
-    print("test completed.")
+    print("test completed, accuracy:", correct/total)

@@ -8,3 +8,5 @@ clothing_Recognition/detector/train/*
 *.jpg
 *.zip
 training/*
+clothing_recognition/classifier/__pycache__/clothing_classifier.cpython-36.pyc
+clothing_recognition/classifier/__pycache__/clothing_classifier.cpython-36.pyc
