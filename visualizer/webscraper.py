@@ -1,3 +1,4 @@
+#Need to install selenium, requests, pillow (for PIL)
 from selenium import webdriver
 import time
 import requests
