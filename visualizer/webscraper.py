@@ -12,15 +12,15 @@ path = "chromedriver"
 DRIVER_PATH = path
 class WebScraper:
   
-  def google(self, query):
+  def scrapeOutfits(self, labels, num):
     link = "https://images.google.com/?gws_rd=ssl"
     links = []
     ret = []
-    limit = 10
+    limit = num
     driver = webdriver.Chrome(path)
     driver.maximize_window()
     driver.get(link)
-    driver.find_element_by_xpath('//*[@id="sbtc"]/div/div[2]/input').send_keys(query)
+    driver.find_element_by_xpath('//*[@id="sbtc"]/div/div[2]/input').send_keys(labels)
     driver.find_element_by_xpath('//*[@id="sbtc"]/button').click()
     time.sleep(.5)
     images = driver.find_elements_by_class_name('rg_i')
