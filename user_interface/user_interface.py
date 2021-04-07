@@ -4,10 +4,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
+    print("going to index.htm")
     return render_template("index.htm")
 
 @app.route("/add")
 def add():
+    print("going to add.htm")
     return render_template("add.htm")
 
 @app.route("/add/clothes")
