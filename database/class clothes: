@@ -1,0 +1,3 @@
+class clothes:
+    def __init__(self, type, color):
+        self.
