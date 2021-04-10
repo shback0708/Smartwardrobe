@@ -2,6 +2,8 @@
 # from pyfirmata import Arduino, util
 from time import sleep
 import serial
+import retriever as ret
+#from retriever import getAngle
 # This function will be imported from retriever.py
 #from retriever import 
 # def servo_control():
@@ -46,13 +48,10 @@ serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
 serialcomm.timeout = 1
 
 while True:
-    i = input("input the desired angle: ").strip()
-    if i == "done":
-       print ("finished program")
-       break
-    serialcomm.write(i.encode())
-
-    #angle = getAngle()
-    #serialcomm.write(angle)
+    angle = ret.getAngle()
+    if angle == "done":
+        print("finished program")
+        break
+    serialcomm.write(angle)
     
 serialcomm.close()
