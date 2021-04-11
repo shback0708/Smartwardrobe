@@ -11,3 +11,9 @@ Retriever -> we will be using pyserial to communicate with the arduino
 pip3 install -U pyserial
 
 Hardware -> servo needs to be able to rotate hanger with 35kg
+
+stuff that I need to do today
+-> implement center of mass function to find optimal place of clothing
+-> debug the servo and the get angle function
+-> retriever doesn't need to be in a while loop
+-> flask debug
