@@ -1,57 +1,22 @@
 #!/usr/bin/env python3
 # from pyfirmata import Arduino, util
-from time import sleep
+import time
 import serial
 import retriever as ret
-#from retriever import getAngle
-# This function will be imported from retriever.py
-#from retriever import 
-# def servo_control():
-#     board = Arduino('COM4')
-#     pin_9 = board.get_pin('d:9:p') # pwm pin
-#     print ("sending out pwm signal")
 
-#     angle = 0
-#     while True:
-#         update_angle(angle)
-#         pin_9.write(angle)
-#         sleep(2)
-
-#     return
-
-# arduino_data = serial.Serial('/dev/cu.usbmodem1101', 9600)
-# arduino_data.timeout = 1
-
-# while 1:
-#     i = input("input open or close: ").strip()
-#     if i == "done":
-#         print ("finished program")
-#         break
-    
-#     arduino_data.write(i.encode())
-#     time.sleep(0.5)
-#     print(arduino_data.readline().decode('ascii'))
-
-# arduino_data.close()
-
-# This might be completely unnecessary
-
-# Once the arduino script of retriever api is loaded into the board,
-# we are able to just call this function
-
-# So here currently I have tested that we can take an input 
-
-import serial
-import time
-
-serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
+serialcomm = serial.Serial('/dev/cu.usbmodem101', 9600)
 serialcomm.timeout = 1
 
 while True:
-    angle = ret.getAngle()
-    if angle == "done":
-        print("finished program")
-        break
-    serialcomm.write(angle)
+    #angle = ret.getAngle()
+    for i in range (0, 180, 20):
+        #convert int to string
+        angle = str(i) + "\n"
+        serialcomm.write(angle.strip().encode())
+        time.sleep(2)
+    # if angle == "done":
+    #     print("finished program")
+    #     break
+    # serialcomm.write(angle)
     
 serialcomm.close()
