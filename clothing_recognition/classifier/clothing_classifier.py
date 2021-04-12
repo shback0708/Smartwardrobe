@@ -34,6 +34,33 @@ class ClothingClassifier:
             print("no model found")
             quit()
     
+    def batchGetAttributes(self, imgs):
+        processed = []
+        if len(imgs) == 0:
+            return []
+
+
+        for img in imgs:
+            img = img.resize((width, height))
+            x = image.img_to_array(img)
+            # x = x.reshape((1,) + x.shape)
+            x /= 255.
+            processed.append(x)
+
+        results = self.model.predict(np.array(processed), batch_size=16)
+
+        ret = []
+        for i in range(len(processed)):
+            top5 = np.argpartition(results[i], -5)[-5:]
+            predicted_classes = []
+            predicted_probabilities = []
+            for j in range(5):
+                predicted_classes.append(class_lookup[top5[j]])
+                predicted_probabilities.append(results[i][top5[j]])
+            ret.append((predicted_classes, predicted_probabilities))
+
+        return ret
+
     def getAttributes(self, img):
         # Convert it to a Numpy array with target shape.
         img = img.resize((width, height))
@@ -44,13 +71,12 @@ class ClothingClassifier:
         x = x.reshape((1,) + x.shape)
         x /= 255.
         result_verbose = self.model.predict([x])
-        top3 = np.argpartition(result_verbose[0], -3)[-3:]
+        top5 = np.argpartition(result_verbose[0], -5)[-5:]
         predicted_classes = []
         predicted_probabilities = []
-        for i in range(3):
-            print(len(class_lookup))
-            predicted_classes.append(class_lookup[top3[i]])
-            predicted_probabilities.append(result_verbose[0][top3[i]])
+        for i in range(5):
+            predicted_classes.append(class_lookup[top5[i]])
+            predicted_probabilities.append(result_verbose[0][top5[i]])
         # print(predicted_classes, predicted_probability)
         # predicted_class = class_lookup[np.argmax(result_verbose, axis=1)[0]]
         # predicted_probability = result_verbose[0][np.argmax(result_verbose, axis=1)[0]]
@@ -63,29 +89,45 @@ class ClothingClassifier:
         # print(color)
         return predicted_classes, predicted_probabilities, color
 
+import time
+import csv
 if __name__ == '__main__':
-    cc = ClothingClassifier()
-    test_dir = "data/test/"
-    test_dir = os.path.join(os.path.dirname(__file__),test_dir)
-    test_imgs = []
-    total = 0
-    correct = 0
-    for path, subdirs, files in os.walk(test_dir):
-        category = path[-10:]
-        print("path", path)
-        for name in files:
-            filepath = os.path.join(path, name)
-            test_imgs.append(filepath)
-            img = pilimage.open(filepath)
-            predicted_classes, predicted_probabilities, color = cc.getAttributes(img)
-            total += 1
-            if category in predicted_classes:
-                correct += 1
+    valfile = "data/top5.csv"
+    fields = ["Category", "top-5 acc", "time"]
+    with open(valfile, 'w') as f:
+        write = csv.writer(f)
+        write.writerow(fields)
+        cc = ClothingClassifier()
+        test_dir = "data/test/"
+        test_dir = os.path.join(os.path.dirname(__file__),test_dir)
+        test_imgs = []
+        total = 0
+        correct = 0
+        for path, subdirs, files in os.walk(test_dir):
+            category = os.path.basename(os.path.normpath(path))
+            print("category", category)
+            category_total = 0
+            category_correct = 0
 
+            imgs = []
+            start = time.time()
+            for name in files:
+                filepath = os.path.join(path, name)
+                test_imgs.append(filepath)
+                with pilimage.open(filepath).convert('RGB') as img:
+                    imgs.append(img)
 
-    random_test_image = random.choice(test_imgs)
-    #img_data = tf.io.gfile.GFile(random_test_image, 'rb').read()
-    img = pilimage.open(random_test_image)
-    print(random_test_image)
-    cc.getAttributes(img)
+            predictions = cc.batchGetAttributes(imgs)
+            for predicted_classes, predicted_probabilies in predictions:
+                category_total += 1
+                if category in predicted_classes:
+                    category_correct += 1
+
+            if category_total > 0:
+                end = time.time()
+                write.writerow([category_total, category_correct/category_total, end - start])
+                print("total:", category_total, "accuracy:", category_correct/category_total, "time:", end - start)
+            total += category_total
+            correct += category_correct
+
     print("test completed, accuracy:", correct/total)
