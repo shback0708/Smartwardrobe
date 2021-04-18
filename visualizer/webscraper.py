@@ -16,7 +16,7 @@ path = "chromedriver"
 DRIVER_PATH = path
 class WebScraper:
   
-  def scrapeOutfits(self, labels, num):
+  def scrapeOutfits(self, labels, num, offset = 0):
     link = "https://images.google.com/?gws_rd=ssl"
     links = []
     ret = []
@@ -55,9 +55,9 @@ class WebScraper:
         link = img.get_attribute("src")
         if(link[0:4] == "http"):
           count += 1
-          links.append(link)
+          if (count >= offset):
+            links.append(link)
         if(count == limit):
-          
           break
       except:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
