@@ -12,10 +12,10 @@ def init_database(database):
         database.append(clothes(-1, "", ""))
     return
 
-def find_empty_angle_index(database):
-    for i in range(len(database)):
-        if database[i].angle == -1:
-            return i
+# def find_empty_angle_index(database):
+#     for i in range(len(database)):
+#         if database[i].angle == -1:
+#             return i
 
 ''' 
 0 -> [0,-5]
@@ -53,11 +53,11 @@ def find_index_to_add(database):
     temp = []
     for i in range(len(database)):
         if database[i].angle != -1:
-            [x,y] = convert_index_to_coordinate[i]
+            [x,y] = convert_index_to_coordinate(i)
             com[0] += x
             com[1] += y
         else:
-            temp += i
+            temp += [i]
     
     # now we have center of mass
     # we will go through temp, find coordinate of index furthest from temp
@@ -73,15 +73,15 @@ def find_index_to_add(database):
 
     return max_index
 
-def add_to_database(database, index, type_of_clothes, color):
-    database[i].angle = index * 9
+def add_to_database(database, i, type_of_clothes, color):
+    database[i].angle = i * 9
     database[i].type_of_clothes = type_of_clothes
     database[i].color = color 
     return
 
 def find_clothes_index(database, type_of_clothes, color):
     for i in range(len(database)):
-        if database[i].type_of_clothes == type_of_clothes and database[i].color = color:
+        if ((database[i].type_of_clothes == type_of_clothes) and (database[i].color == color)):
             return i
         else:
             return -1
@@ -89,4 +89,6 @@ def find_clothes_index(database, type_of_clothes, color):
 
 def remove_from_database(database, index):
     database[index].angle = -1
+    database[index].type_of_clothes = "removed"
+    database[index].color = "removed"
     return

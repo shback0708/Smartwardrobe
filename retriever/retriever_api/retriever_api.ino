@@ -5,6 +5,7 @@ Servo servo_test;
 int default_angle = 90;
 String inBytes;
 int angle = 0;
+int new_angle;
 
 void setup() {
   servo_test.attach(9);
@@ -18,8 +19,9 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     inBytes = Serial.readStringUntil('\n');
-    angle = inBytes.toInt();
-    servo_test.write(angle);
+    new_angle = inBytes.toInt();
+    servo_test.write(new_angle);
+    delay(2000);
     Serial.println(inBytes);
     
 //    if (inBytes == "open") {
@@ -34,5 +36,4 @@ void loop() {
 //      Serial.println("invalid input");
 //    }
   }
-
 }

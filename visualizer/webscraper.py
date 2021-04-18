@@ -2,6 +2,7 @@
 #pip install selnium
 #pip install webcolors==1.3
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
 import requests
 from PIL import Image
@@ -21,7 +22,9 @@ class WebScraper:
     ret = []
     limit = num
     query = ""
-    driver = webdriver.Chrome(path)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(path, options = chrome_options)
     driver.maximize_window()
     driver.get(link)
     if(len(labels) == 2):
@@ -58,7 +61,6 @@ class WebScraper:
           break
       except:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    print(len(links))
     driver.close()
     for l in links:
       print(l)
@@ -68,7 +70,6 @@ class WebScraper:
         ret.append(im)
       except:
         pass
-    print(len(ret))
     return ret
   #used from https://stackoverflow.com/questions/9694165/convert-rgb-color-to-
   #english-color-name-like-green-with-python#:~:text=To%20find%20the%20closest
@@ -85,6 +86,6 @@ class WebScraper:
   
 if __name__ == '__main__':
     ws = WebScraper()
-    ws.scrapeOutfits((("shirt", "flannel", "a", "b", "c", (0,0,0)), ("jeans", "long", "a", "b", "c", (0,0,255))), 100)
+    ws.scrapeOutfits((("shirt", "flannel", "a", "b", "c", (0,0,0)), ("jeans", "long", "a", "b", "c", (0,0,255))), 50)
     #ws.scrapeOutfits(("dress", "a", "b", "c", "d", (200,0,0)), 80)
     print("test completed.")

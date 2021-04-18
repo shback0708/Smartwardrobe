@@ -3,17 +3,21 @@ CMU ECE 18500 Capstone - Smart Wardrobe
 
 There will be some dependencies on running this code. 
 
-User Interface - We will be using Flask for backend so in order to run we need to pip3 install -U Flask
-After this, we would do export FLASK_APP:flask_practice.py
+Using flask for backend so setup virtual environment
+python3 -m venv env
+source env/bin/activate
 
+now we should see (env) to the left of the prompt in terminal, indicating now working in a virtual environment
 
-Retriever -> we will be using pyserial to communicate with the arduino
-pip3 install -U pyserial
+when we want to leave, just run "deactivate"
+
+after running python3 user_interface.py,
+go to 127.0.0.1:5000, which is going to be the localhost
+
+when you want to exit out this process, just type command+c to completely kill the process
 
 Hardware -> servo needs to be able to rotate hanger with 35kg
 
 stuff that I need to do today
--> implement center of mass function to find optimal place of clothing
--> debug the servo and the get angle function
--> retriever doesn't need to be in a while loop
+-> filter
 -> flask debug
