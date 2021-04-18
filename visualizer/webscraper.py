@@ -64,7 +64,7 @@ class WebScraper:
       print(l)
       response = requests.get(l)
       try:
-        im = Image.open(BytesIO(response.content))
+        im = Image.open(BytesIO(response.content)).convert('RGB')
         ret.append(im)
       except:
         pass
