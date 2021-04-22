@@ -1,5 +1,4 @@
 # this angle will be from 0 to 180, incremented by 9 
-database = []
 
 class clothes:
     def __init__(self, angle, type_of_clothes, color):
@@ -10,6 +9,11 @@ class clothes:
 def init_database(database):
     for i in range(20):
         database.append(clothes(-1, "", ""))
+    return
+
+def print_database(database):
+    for clothes in database:
+        print(clothes.angle, clothes.type_of_clothes, clothes.color)
     return
 
 # def find_empty_angle_index(database):
