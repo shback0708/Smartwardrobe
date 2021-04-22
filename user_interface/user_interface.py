@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, request
 from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 
@@ -6,7 +6,7 @@ app = Flask(__name__)
 nav = Nav(app)
 
 nav.register_element('my_navbar', Navbar('thenav', 
-View('Home', 'index'), 
+View('Home', 'home'), 
 View('Add', 'add'), 
 View('Remove', 'remove'),
 View('Return', 'ret'),
@@ -15,8 +15,16 @@ View('Take', 'take')
 
 @app.route("/")
 def index():
-    print("going to index.htm")
-    return render_template("index.html")
+    return redirect(url_for('home'))
+
+@app.route("/home", methods=["POST", "GET"])
+def home():
+    if request.method == "POST":
+        type_of_action = request.form["nm"]
+        return redirect(url_for(type_of_action))
+    else: # request is get
+        print("going to home.html")
+        return render_template("home.html")
 
 @app.route("/add")
 def add():
