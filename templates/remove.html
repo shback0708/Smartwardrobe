@@ -2,11 +2,16 @@
 
 {% block body %}
 <h1>Let's remove some clothes</h1>
-    <p>Choose the action you would like to perform</p>
-    <!-- Need to figure out how to efficiently guide through each page-->
-    <button onclick="take">take</button>
-    <button onclick="ret">return</button>
-    <button onclick="add">add</button>
-    <button onclick="remove">remove</button>
+    <p>Choose the clothes in the database you would like to remove</p>
+
+    <form>
+        <label for="remove">Remove an Item:</label>
+        <select name="remove">
+        {% for opt in datab %}
+            <option>{{ opt.color }} {{ opt.type_of_clothes }}</option>
+        {% endfor %}
+        </select>
+    </form>
+    
 
 {% endblock %}

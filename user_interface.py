@@ -51,10 +51,11 @@ def add():
         return render_template("add.html")
 
 
+# for remove clothes, I want to display database
 @app.route("/remove")
 def remove():
     print("going to remove.html")
-    return render_template("remove.html")
+    return render_template("remove.html", datab = database)
 
 # This will be same as add except, we will redirect to 
 # 1 additional page, which will require user feedback of clothes
