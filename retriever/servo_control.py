@@ -6,13 +6,10 @@ import retriever as ret
 def rotate_servo(angle):
     print("is it going in")
     print(angle)
-    serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
-    #serialcomm.timeout = 1
     time.sleep(1)
     angle_to_string = str(angle) + "\n"
     serialcomm.write(angle_to_string.strip().encode())
     time.sleep(2)
-    serialcomm.close()
     return
 
 #rotate_servo(180)

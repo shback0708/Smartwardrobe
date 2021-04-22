@@ -86,6 +86,12 @@ def find_clothes_index(database, type_of_clothes, color):
         else:
             return -1
 
+def match_type_or_color(database, type_of_clothes, color):
+    for i in range(len(database)):
+        if ((database[i].type_of_clothes == type_of_clothes) or (database[i].color == color)):
+            return i
+        else:
+            return -1
 
 def remove_from_database(database, index):
     database[index].angle = -1
