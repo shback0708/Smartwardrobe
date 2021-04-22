@@ -5,12 +5,12 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     print("going to index.htm")
-    return render_template("index.htm")
+    return render_template("index.html")
 
 @app.route("/add")
 def add():
-    print("going to add.htm")
-    return render_template("add.htm")
+    print("going to add.html")
+    return render_template("add.html")
 
 # @app.route("/add/clothes")
 # def add_clothes():
@@ -24,15 +24,18 @@ def add():
 
 @app.route("/remove")
 def remove():
-    return render_template("remove.htm")
+    print("going to remove.html")
+    return render_template("remove.html")
 
 @app.route("/ret")
 def ret():
-    return render_template("ret.htm")
+    print("going to ret.html")
+    return render_template("ret.html")
 
 @app.route("/take")
 def take():
-    return render_template("take.htm")
+    print("going to take.htnml")
+    return render_template("take.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

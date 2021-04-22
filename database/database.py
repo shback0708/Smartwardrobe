@@ -89,7 +89,7 @@ def find_clothes_index(database, type_of_clothes, color):
 def match_type_or_color(database, type_of_clothes, color):
     for i in range(len(database)):
         if ((database[i].type_of_clothes == type_of_clothes) or (database[i].color == color)):
-            return i
+            return database[i]
         else:
             return -1
 
