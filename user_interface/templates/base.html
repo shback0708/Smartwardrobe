@@ -6,17 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="take.html">Take</a></li>
-                <li><a href="ret.html">Return</a></li>
-                <li><a href="add.html">Add</a></li>
-                <li><a href="remove.html">Remove</a></li>
-            </ul>
-        </nav>
-    </header>
+    {{nav.my_navbar.render() }}
     {% block body %}{% endblock %}
     
 </body>

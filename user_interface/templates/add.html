@@ -1,24 +1,12 @@
-<!DOCTYPE html>
-<html>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.htm">Home</a></li>
-                <li><a href="take.htm">Take</a></li>
-                <li><a href="return.htm">Return</a></li>
-                <li><a href="add.htm">Add</a></li>
-                <li><a href="remove.htm">Remove</a></li>
-                <li><a href="update.htm">Update</a></li>
-            </ul>
-        </nav>
-    </header>
-    <script src="user_interface.js"></script>
-    <h1>Smart Wardrobe</h1>
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Let's add some clothes</h1>
     <p>Choose the action you would like to perform</p>
+    <!-- Need to figure out how to efficiently guide through each page-->
     <button onclick="take">take</button>
-    <button onclick="return">return</button>
+    <button onclick="ret">return</button>
     <button onclick="add">add</button>
     <button onclick="remove">remove</button>
-</body>
-</html>
+
+{% endblock %}
