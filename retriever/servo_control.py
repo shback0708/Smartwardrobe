@@ -3,33 +3,30 @@ import time
 import serial
 import retriever as ret
 
-def rotate_servo(angle):
-    print("is it going in")
+# cur_angle and angle are both 0 to 180
+def rotate_servo(cur_angle, angle):
+    print("going to rotate the servo 6 degrees at a time")
     print(angle)
     time.sleep(1)
-    angle_to_string = str(angle) + "\n"
-    serialcomm.write(angle_to_string.strip().encode())
-    time.sleep(2)
+
+    # attempt to rotate the servo 6 degrees at a time
+    if cur_angle >= angle:
+        for temp_angle in range(cur_angle, angle , -3):
+            t_angle_to_string = str(temp_angle) + "\n"
+            serialcomm.write(angle_to_string.strip().encode())
+            time.sleep(0.2)
+        angle_to_string = str(angle) + "\n"
+        serialcomm.write(angle_to_string.strip().encode())
+        time.sleep(1)
+    else:
+        # angle > cur_angle so increment
+        for temp_angle in range(cur_angle, angle , 3):
+            t_angle_to_string = str(temp_angle) + "\n"
+            serialcomm.write(angle_to_string.strip().encode())
+            time.sleep(0.2)
+        angle_to_string = str(angle) + "\n"
+        serialcomm.write(angle_to_string.strip().encode())
+        time.sleep(1)
     return
 
 #rotate_servo(180)
-
-# we don't need a while true loop
-# if we just want to test the servo we just uncomment the part below
-# and comment the part above
-
-# serialcomm = serial.Serial('/dev/cu.usbmodem101', 9600)
-# serialcomm.timeout = 1
-# while True:
-#     #angle = ret.getAngle()
-#     for i in range (0, 180, 20):
-#         #convert int to string
-#         angle = str(i) + "\n"
-#         serialcomm.write(angle.strip().encode())
-#         time.sleep(2)
-#     # if angle == "done":
-#     #     print("finished program")
-#     #     break
-#     # serialcomm.write(angle)
-    
-# serialcomm.close()
