@@ -1,5 +1,9 @@
+import os
 def setRating(p, outfit):
-  f = open("fb.txt", "w+")
+  if not os.path.exists("fb.txt"):
+    f = open("fb.txt", "w")
+    f.close()
+  f = open("fb.txt", "r")
   c = f.read()
   lines = c.split("\n")
   like = ""
@@ -32,13 +36,14 @@ def setRating(p, outfit):
       if outfit in o:
         o.remove(outfit)
         like = ",".join(o)
+  f.close()
+  f = open("fb.txt", "w")
   f.seek(0)
   f.truncate()
   f.write(like)
   f.write("\n")
   f.write(dislike)
   f.close()
-  
 def getRating(outfit):
   try:
     f = open("fb.txt", "r")
