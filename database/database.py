@@ -1,19 +1,20 @@
 # this angle will be from 0 to 180, incremented by 9 
 
 class clothes:
-    def __init__(self, angle, type_of_clothes, color):
+    def __init__(self, angle, type_of_clothes, color, preference):
         self.angle = angle
         self.type_of_clothes = type_of_clothes
         self.color = color 
+        self.preference = 0
 
 def init_database(database):
     for i in range(20):
-        database.append(clothes(-1, "", ""))
+        database.append(clothes(-1, "", "", 0))
     return
 
 def print_database(database):
     for clothes in database:
-        print(clothes.angle, clothes.type_of_clothes, clothes.color)
+        print(clothes.angle, clothes.type_of_clothes, clothes.color, clothes.preference)
     return
 
 # def find_empty_angle_index(database):
@@ -77,10 +78,11 @@ def find_index_to_add(database):
 
     return max_index
 
-def add_to_database(database, i, type_of_clothes, color):
+def add_to_database(database, i, type_of_clothes, color, preference):
     database[i].angle = i * 9
     database[i].type_of_clothes = type_of_clothes
     database[i].color = color 
+    database[i].preference = preference
     return
 
 def find_clothes_index(database, type_of_clothes, color):
@@ -101,4 +103,5 @@ def remove_from_database(database, index):
     database[index].angle = -1
     database[index].type_of_clothes = "removed"
     database[index].color = "removed"
+    database[index].preference = 0
     return

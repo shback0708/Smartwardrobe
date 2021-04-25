@@ -26,16 +26,12 @@ def take(database, color):
         sc.rotate_servo(i * 9)
     else:
         print ("given clothes spec doesn't exist")
+        return -1
     time.sleep(1)
     return 0
 
 def remove(databse, clothes):
     return 0
-
-def print_database(database):
-    for clothes in database:
-        print(clothes.angle, clothes.type_of_clothes, clothes.color)
-    return
 
 def main():
     print ("starting the demo")

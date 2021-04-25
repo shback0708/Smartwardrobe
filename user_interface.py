@@ -18,6 +18,9 @@ View('Take', 'take')
 ))
 
 database = []
+cur_angle = 0
+cur_type_of_clothes = ""
+cur_color = ""
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
 
 @app.route("/")
@@ -33,7 +36,7 @@ def home():
         print("going to home.html")
         return render_template("home.html")
 
-@app.route("/add")
+@app.route("/add", methods=["POST", "GET"])
 def add():
     if request.method == "POST":
         img_file = request.form["img"]
@@ -41,8 +44,9 @@ def add():
         # type_of_clothes, color = post_request(img_file) 
         type_of_clothes = "tshirt"
         color = "blue"
-        add(database, type_of_clothes, color)
-        return redirect(url_for('waiting'))
+        # we don't add clothes to the database here yet
+        # add(database, type_of_clothes, color)
+        return redirect(url_for('update'))
 
         # Now we add this new clothes to the database
 
@@ -62,7 +66,20 @@ def remove():
 @app.route("/ret")
 def ret():
     print("going to ret.html")
-    return render_template("ret.html")
+    if request.method == "POST":
+        img_file = request.form["img"]
+        # Henry this part is where you need to do the integration
+        # type_of_clothes, color = post_request(img_file) 
+        type_of_clothes = "tshirt"
+        color = "blue"
+        add(database, type_of_clothes, color)
+        return redirect(url_for('update'))
+
+        # Now we add this new clothes to the database
+
+    else: 
+        print("going to add.html")   
+        return render_template("ret.html")
 
 # I will implement checkboxes
 @app.route("/take")
@@ -85,27 +102,43 @@ def take():
     return render_template("take.html", class_lookup = class_lookup)
 
 
-@app.route("/update")
-def update():
-    print("going to update.html")
-    return render_template("update.html")
+@app.route("/update_add", methods=["POST", "GET"])
+def update_add():
+    if request.method == "POST":
+        # here I will update the database
+        preference = request.form["nm"]
+        add_to_db(database, cur_type_of_clothes, cur_color, preference)
+        return redirect(url_for('home'))
+    else:
+        print("going to update_add.html")
+        return render_template("update_add.html")
 
 
-def add(database, type_of_clothes, color):
+def add_to_db(database, type_of_clothes, color, preference):
     # add to database
     i = db.find_index_to_add(database)
-    db.add_to_database(database, i, "tshirt", color)
+    db.add_to_database(database, i, type_of_clothes, color, preference)
     # after we add to database, we will rotate the servo
-    sc.rotate_servo(i * 9)
-    time.sleep(1)
+    sc.rotate_servo(cur_angle, i * 9)
     return 0
 
-
+def remove_from_db(database, type_of_clothes, color):
+    # remove from database 
+    i = db.find_clothes_index(database, type_of_clothes, color)
+    db.remove_from_database(database, i)
+    if i != -1:
+        sc.rotate_servo(i * 9)
+    else:
+        print ("given clothes spec doesn't exist")
+        return -1
+    time.sleep(1)
+    return 0
 
 if __name__ == "__main__":
     print("starting smartwardrobe")
     db.init_database(database)
     db.print_database(database)
+    cur_angle = 0
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)
     
