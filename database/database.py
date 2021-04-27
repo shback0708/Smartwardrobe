@@ -9,7 +9,7 @@ class clothes:
 
 def init_database(database):
     for i in range(20):
-        database.append(clothes(-1, "", "", 0))
+        database.append(clothes(-1, "tshirt", "red", 0))
     return
 
 def print_database(database):

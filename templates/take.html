@@ -1,13 +1,46 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>Smart Wardrobe is currently rotating</h1>
-    <p>Press done when the machine stops rotating and you have entered your preference</p>
+<h1>Let's Take some clothes</h1>
+    <p>Select the type of clothes, and the rgb</p>
 
-    <form method = "post">
-        <p>Action:</p>
-        <p><input type="text" name="nm"/></p>
-        <p><input type="submit" value = "done"/></p>
+    <form>
+    {% for n in class_lookup %}
+        <input type="checkbox" name= "clothes">
+        <label for={{ n }}>{{ n }}</label>
+    {% endfor %}
+        <br />
+        <input type="range" name = "r" min="0" max="255" step="1" onchange="updateTextInputR(this.value)">
+        <input type="text" id="rslide" name="red" value="">
+        <label for="r">R</label>
+
+        <input type="range" name = "G" min="0" max="255" step="1" onchange="updateTextInputG(this.value)">
+        <input type="text" id="gslide" name="green" value="">
+        <label for="g">G</label>
+
+        <input type="range" name = "b" min="0" max="255" step="1" onchange="updateTextInputB(this.value)">
+        <input type="text" id="bslide" name="blue" value="">
+        <label for="b">B</label>
+
+        <input type="submit">
     </form>
+
+<script>
+    function updateTextInputR(val) {
+        document.getElementById('rslide').value = val;
+    }
+
+    function updateTextInputG(val) {
+        document.getElementById('gslide').value = val;
+    }
+
+    function updateTextInputB(val) {
+        document.getElementById('bslide').value = val;
+    }
+</script>
+
+
+
+    
 
 {% endblock %}
