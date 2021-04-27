@@ -42,17 +42,28 @@ def add():
         img_file = request.form["img"]
         # Henry this part is where you need to do the integration
         # type_of_clothes, color = post_request(img_file) 
-        type_of_clothes = "tshirt"
-        color = "blue"
+        cur_type_of_clothes = "tshirt"
+        cur_color = "blue"
         # we don't add clothes to the database here yet
         # add(database, type_of_clothes, color)
-        return redirect(url_for('update'))
+        return redirect(url_for('update_add'))
 
         # Now we add this new clothes to the database
 
     else: 
         print("going to add.html")   
         return render_template("add.html")
+
+@app.route("/update_add", methods=["POST", "GET"])
+def update_add():
+    if request.method == "POST":
+        # here I will update the database
+        preference = request.form["nm"]
+        add_to_db(database, cur_type_of_clothes, cur_color, preference)
+        return redirect(url_for('home'))
+    else:
+        print("going to update_add.html")
+        return render_template("update_add.html")
 
 
 # for remove clothes, I want to display database
@@ -63,15 +74,15 @@ def remove():
 
 # This will be same as add except, we will redirect to 
 # 1 additional page, which will require user feedback of clothes
-@app.route("/ret")
+@app.route("/ret", methods=["POST", "GET"])
 def ret():
     print("going to ret.html")
     if request.method == "POST":
         img_file = request.form["img"]
         # Henry this part is where you need to do the integration
         # type_of_clothes, color = post_request(img_file) 
-        type_of_clothes = "tshirt"
-        color = "blue"
+        cur_type_of_clothes = "tshirt"
+        cur_color = "blue"
         add(database, type_of_clothes, color)
         return redirect(url_for('update'))
 
@@ -80,6 +91,17 @@ def ret():
     else: 
         print("going to add.html")   
         return render_template("ret.html")
+
+@app.route("/update_ret", methods=["POST", "GET"])
+def update_ret():
+    if request.method == "POST":
+        # here I will update the database
+        preference = request.form["nm"]
+        add_to_db(database, cur_type_of_clothes, cur_color, preference)
+        return redirect(url_for('home'))
+    else:
+        print("going to update_ret.html")
+        return render_template("update_ret.html")
 
 # I will implement checkboxes
 @app.route("/take")
@@ -102,24 +124,14 @@ def take():
     return render_template("take.html", class_lookup = class_lookup)
 
 
-@app.route("/update_add", methods=["POST", "GET"])
-def update_add():
-    if request.method == "POST":
-        # here I will update the database
-        preference = request.form["nm"]
-        add_to_db(database, cur_type_of_clothes, cur_color, preference)
-        return redirect(url_for('home'))
-    else:
-        print("going to update_add.html")
-        return render_template("update_add.html")
-
-
 def add_to_db(database, type_of_clothes, color, preference):
     # add to database
     i = db.find_index_to_add(database)
     db.add_to_database(database, i, type_of_clothes, color, preference)
     # after we add to database, we will rotate the servo
     sc.rotate_servo(cur_angle, i * 9)
+    # update the cur_angle
+    cur_angle = i * 9
     return 0
 
 def remove_from_db(database, type_of_clothes, color):
@@ -128,6 +140,8 @@ def remove_from_db(database, type_of_clothes, color):
     db.remove_from_database(database, i)
     if i != -1:
         sc.rotate_servo(i * 9)
+        # update the cur_angle
+        cur_angle = i * 9
     else:
         print ("given clothes spec doesn't exist")
         return -1
