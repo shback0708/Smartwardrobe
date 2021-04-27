@@ -1,17 +1,13 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>Let's remove some clothes</h1>
-    <p>Choose the clothes in the database you would like to remove</p>
+<h1>Smart Wardrobe is currently rotating</h1>
+    <p>Press done when the machine stops rotating and you have entered your preference</p>
 
-    <form>
-        <label for="remove">Remove an Item:</label>
-        <select name="remove">
-        {% for opt in datab %}
-            <option>{{ opt.color }} {{ opt.type_of_clothes }}</option>
-        {% endfor %}
-        </select>
+    <form method = "post">
+        <p>Action:</p>
+        <p><input type="text" name="nm"/></p>
+        <p><input type="submit" value = "done"/></p>
     </form>
-    
 
 {% endblock %}

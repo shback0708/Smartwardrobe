@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>Let's return some clothes</h1>
-    <p>Choose the action you would like to perform</p>
-    <!-- Need to figure out how to efficiently guide through each page-->
-    <button onclick="take">take</button>
-    <button onclick="ret">return</button>
-    <button onclick="add">add</button>
-    <button onclick="remove">remove</button>
+<h1>Smart Wardrobe is currently rotating</h1>
+    <p>Press done when the machine stops rotating and you have entered your preference</p>
+
+    <form method = "post">
+        <p>Action:</p>
+        <p><input type="text" name="nm"/></p>
+        <p><input type="submit" value = "done"/></p>
+    </form>
 
 {% endblock %}
