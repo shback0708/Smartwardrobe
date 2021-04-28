@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<h1>Let's add some clothes</h1>
-    <p>Choose the image of clothes you would like to add to your wardrobe</p>
+<h1>Let's take some clothes</h1>
+    <p>Choose the combination of clothes you would like to wear today!</p>
 
-    <form>
+    <form method = "post">
         <label for="img">Select image:</label>
         {% for img in imgs %}
-            <!--checkbox-->
-            <!--image file start-->{{ img }}<!--image file end-->
+        <input type="checkbox" name = "mycheckbox">
+        <image src = "{{ url_for('static', filename = img)}}"></image>
+        <!--image file start-->{{ img }}<!--image file end-->
         {% endfor %}
-        <input type="submit">
+        <input type="submit" value = "done">
     </form>
 
 {% endblock %}

@@ -259,20 +259,6 @@ def update_take():
         print("going to update_take.html")
         return render_template("update_take.html")
 
-def remove_from_db(database, type_of_clothes, color):
-    # remove from database 
-    i = db.find_clothes_index(database, type_of_clothes, color)
-    db.remove_from_database(database, i)
-    if i != -1:
-        sc.rotate_servo(i * 9)
-        # update the cur_angle
-        cur_angle = i * 9
-    else:
-        print ("given clothes spec doesn't exist")
-        return -1
-    time.sleep(1)
-    return 0
-
 if __name__ == "__main__":
     print("starting smartwardrobe")
     db.init_database(database)
