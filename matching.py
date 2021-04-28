@@ -24,7 +24,7 @@ def setFilter(category, color):
 # output_of_setFilter will be a 2D array
 # output of getMatches will be all the images displayed to the user
 # final will look like [[]]
-def getMatches(vapi, output_of_setFilter):
+def getMatches(vapi, database, output_of_setFilter):
     good_rating = set()
     no_rating = set()
     bad_rating = set()
@@ -32,10 +32,37 @@ def getMatches(vapi, output_of_setFilter):
         color, type_of_clothes = c.split(",")
         clothing_type = vapi.getClothingType(type_of_clothes)
         # this means it's a top
+        # we need to add suggestions for the bottom
         if clothing_type == 0:
+            # finish it up by adding top and bottom combo to the temp
+            for clothes in database:
+                if clothes.clothing_type == 1:
+                    temp = color + type_of_clothes
+                    temp += clothes.color
+                    temp += clothes.type_of_clothes
+                    rating = up.getRating(temp)
+                    if rating == -1:
+                        bad_rating.add(temp)
+                    elif rating == 0:
+                        no_rating.add(temp)
+                    elif rating == 1:
+                        good_rating.add(temp)
 
-
+        # bottom
         elif clothing_type == 1:
+            # finish it up by adding top and bottom combo to the temp
+            for clothes in database:
+                if clothes.clothing_type == 0:      
+                    temp = clothes.color
+                    temp += clothes.type_of_clothes
+                    temp += (color + type_of_clothes)
+                    rating = up.getRating(temp)
+                    if rating == -1:
+                        bad_rating.add(temp)
+                    elif rating == 0:
+                        no_rating.add(temp)
+                    elif rating == 1:
+                        good_rating.add(temp)
 
 
         # This means it's one piece, check preference immediately    

@@ -3,7 +3,7 @@ from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 import database.database as db
 import retriever.servo_control as sc
-import clothing_recognization.clothing_recognizer as cr
+import clothing_recognition.clothing_recognizer as cr
 import time
 import serial
 from PIL import Image
@@ -234,16 +234,16 @@ def show_take():
         # Call the matching API
         clothes_to_take = matching.setFilter(final_clothes, nearest_color)
         # Call the preference API using the clothes_to_take
-        combinations = matching.getMatches(clothes_to_take)
+        combinations = matching.getMatches(vapi, database, clothes_to_take)
 
         # combinations here will be a set of strings that will look like
         #("blueshirtredpants", "whitejacketbluejeans")
-        
+
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
         for clothes_img in combinations:
-            outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
-
+            # outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
+            outfitImages = ""
         return render_template("show_take.html", imgs = outfitImages)
 
 @app.route("/update_take", methods=["POST", "GET"])
