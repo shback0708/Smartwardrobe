@@ -1,6 +1,7 @@
 import sys
 import os
-import pickle
+from diskcache import Cache
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),'..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recognition'))
@@ -9,20 +10,30 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recogniti
 
 from clothing_recognition import clothing_recognizer as cr
 import webscraper as ws
-storagefilename = 'imagestorage.pickle'
+# storagefilename = 'imagestorage.pickle'
 
 class VisualizerAPI:
-    imageStorage = {}
+    imageStorage = None
     clothingRecModel = None
     webScraper = None
     correctness_threshold = 0.4
     def __init__(self):
+        t0 = time.time()
         self.clothingRecModel = cr.ClothingRecognitionModel()
+        t1 = time.time()
         self.webScraper = ws.WebScraper()
-        if os.path.exists(os.path.join(os.path.dirname(__file__),storagefilename)):
-            with open(storagefilename, 'rb') as handle:
-                self.imageStorage = pickle.load(handle)
-
+        t2 = time.time()
+        # if os.path.exists(os.path.join(os.path.dirname(__file__),storagefilename)):
+        #     with open(storagefilename, 'rb') as handle:
+        #         self.imageStorage = pickle.load(handle)
+        self.imageStorage = Cache("imagestorage")
+        t3 = time.time()
+        print("========setup benchmark========")
+        print("clothing recognition model setup time: ", t1 - t0)
+        print("webscraper setup time: ", t2 - t1)
+        print("clothing image storage setup time: ", t3 - t2)
+        print("total time: ", t3 - t0)
+        time.sleep(3)
     @staticmethod
     def roundColor(color, base=50):
         r = int(base * round(color[0] / base))
@@ -35,11 +46,13 @@ class VisualizerAPI:
             key = ( (labels[0][0], VisualizerAPI.roundColor(labels[0][5])), 
                     (labels[1][0], VisualizerAPI.roundColor(labels[1][5])) )
         else:
+            print(labels)
             key = ( (labels[0][0], VisualizerAPI.roundColor(labels[0][5])) )
         print("storage key:", key)
         return key
     @staticmethod
     def colorError(c1, c2):
+        print(c1,c2)
         error = 0
         for i in range(3):
             error += ((c1[i] - c2[i]) / 255) ** 2 
@@ -62,26 +75,30 @@ class VisualizerAPI:
         outfits = []
         offset = 0
         if self.imageStorage.get(VisualizerAPI.getStorageKey(labels)) != None:
-            outfits, offset = self.imageStorage[labels]
+            outfits, offset = self.imageStorage.get(VisualizerAPI.getStorageKey(labels))
             if len(outfits) > num:
                 outfits = outfits[:num]
         
         while len(outfits) < num:
-            potential_outfits = self.webScraper.scrapeOutfits(labels, 2 * (num - len(outfits)) , offset) 
-            for outfit in potential_outfits:
+            print(num - len(outfits), "outfits left")
+            potential_outfits = self.webScraper.scrapeOutfits(labels, int(1.5 * (num - len(outfits))) , offset)
+            
+            for index, result in enumerate(self.clothingRecModel.batchGetLabels(potential_outfits)):
                 offset += 1
-                modelLabels, modelColors = self.clothingRecModel.getLabels(outfit)
-                # make sure model agrees
-                flat_labels = [item for sublist in modelLabels for item in sublist]
 
                 total_correctness = 0
                 # each article we are trying to match
                 for article in labels:
                     # each proposed match 
                     article_correctness = 0
-                    for j in range(len(modelLabels)):
+                    print("predictions: ")
+                    for j in range(len(result)):
+                        modelLabels = result[j][0]
+                        modelProb   = result[j][1]
+                        modelColors = result[j][2]
+                        print("    ", modelLabels, modelProb, modelColors)
                         #see how well it matches given article
-                        correctness = VisualizerAPI.calculateCorrectness(article[:5], article[5], modelLabels[j], modelColors[j])
+                        correctness = VisualizerAPI.calculateCorrectness(article[:5], article[5], modelLabels, modelColors)
                         print("correctness:", correctness)
                         article_correctness = max(correctness, article_correctness)
                     total_correctness += article_correctness
@@ -89,7 +106,7 @@ class VisualizerAPI:
                 total_correctness /= len(labels)
 
                 if total_correctness >= self.correctness_threshold:
-                    outfits.append(outfit)
+                    outfits.append(potential_outfits[index])
                     if len(outfits) >= num:
                         break
 
@@ -98,13 +115,19 @@ class VisualizerAPI:
         return outfits
     
     def saveToDisk(self):
-        with open(storagefilename, 'wb') as handle:
-            pickle.dump(self.imageStorage, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # should be free
+        self.imageStorage.close()
+        return
 
 if __name__ == '__main__':
     vapi = VisualizerAPI()
-    outfitImages = vapi.getOutfitImgs((("Tee", "Flannel", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (0,0,254))), 5)
-    outfitImages[0].save("test0.jpeg", format='jpeg')
-    outfitImages[1].save("test1.jpeg", format='jpeg')
+    time.sleep(3)
+    amnt = 100
+    outfitImages = vapi.getOutfitImgs((("Tee", "Flannel", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (0,0,254))), amnt)
+    for i in range(3):
+        for j in range(3):
+            outfitImages = vapi.getOutfitImgs((("Dress", "Flannel", "a", "b", "c", (i*50,j*50,0)),), amnt)
+            outfitImages[-1].save("dress" + str(i*10 + j) + ".jpeg", format='jpeg')
+    assert(len(outfitImages) == amnt)
     vapi.saveToDisk()
     print("test completed.")

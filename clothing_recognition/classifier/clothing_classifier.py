@@ -39,7 +39,7 @@ class ClothingClassifier:
         if len(imgs) == 0:
             return []
 
-
+        
         for img in imgs:
             img = img.resize((width, height))
             x = image.img_to_array(img)
@@ -47,47 +47,28 @@ class ClothingClassifier:
             x /= 255.
             processed.append(x)
 
-        results = self.model.predict(np.array(processed), batch_size=16)
+        results = self.model.predict(np.array(processed), batch_size=8)
 
         ret = []
         for i in range(len(processed)):
-            top5 = np.argpartition(results[i], -5)[-5:]
+            # calculate top 5 classes
+            top5 = np.argsort(results[i])[-5:][::-1]
             predicted_classes = []
             predicted_probabilities = []
             for j in range(5):
                 predicted_classes.append(class_lookup[top5[j]])
                 predicted_probabilities.append(results[i][top5[j]])
-            ret.append((predicted_classes, predicted_probabilities))
+            # calculate color label
+            imgfile = BytesIO()
+            imgs[i].save(imgfile, format='jpeg')
+            cf = ColorThief(imgfile)
+            color = cf.get_color()
+            ret.append((predicted_classes, predicted_probabilities, color))
 
         return ret
 
     def getAttributes(self, img):
-        # Convert it to a Numpy array with target shape.
-        img = img.resize((width, height))
-        #img = image.load_img(img_path, target_size=(height, width))
-        #x = np.array(img).astype(float)
-        x = image.img_to_array(img)
-        # Reshape
-        x = x.reshape((1,) + x.shape)
-        x /= 255.
-        result_verbose = self.model.predict([x])
-        top5 = np.argpartition(result_verbose[0], -5)[-5:]
-        predicted_classes = []
-        predicted_probabilities = []
-        for i in range(5):
-            predicted_classes.append(class_lookup[top5[i]])
-            predicted_probabilities.append(result_verbose[0][top5[i]])
-        # print(predicted_classes, predicted_probability)
-        # predicted_class = class_lookup[np.argmax(result_verbose, axis=1)[0]]
-        # predicted_probability = result_verbose[0][np.argmax(result_verbose, axis=1)[0]]
-
-        # Get color
-        imgfile = BytesIO()
-        img.save(imgfile, format='jpeg')
-        cf = ColorThief(imgfile)
-        color = cf.get_color()
-        # print(color)
-        return predicted_classes, predicted_probabilities, color
+        return (self.batchGetAttributes([img]))[0]
 
 import time
 import csv
@@ -118,7 +99,7 @@ if __name__ == '__main__':
                     imgs.append(img)
 
             predictions = cc.batchGetAttributes(imgs)
-            for predicted_classes, predicted_probabilies in predictions:
+            for predicted_classes, predicted_probabilities, color in predictions:
                 category_total += 1
                 if category in predicted_classes:
                     category_correct += 1

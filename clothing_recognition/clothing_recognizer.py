@@ -20,6 +20,34 @@ class ClothingRecognitionModel:
         self.detector = cd.ClothingDetector()
         self.classifier = cc.ClothingClassifier()
 
+    def batchGetLabels(self, images):
+        cropped_imgs = []
+        for image in images:
+            detections, c_index = self.detector.getLabels(image)
+            bboxes = detections['detection_boxes'][0].numpy()
+            classes = detections['detection_classes'][0].numpy()
+            scores = detections['detection_scores'][0].numpy()
+            for i in range(3):
+                ymin,xmin,ymax,xmax = bboxes[i]
+                im_width, im_height = image.size
+                dimensions = (min(xmin * im_width, im_width), 
+                            min(ymin * im_height, im_height),
+                            min(xmax * im_width, im_width), 
+                            min(ymax * im_height, im_height))
+                cropped_img = image.crop(dimensions)
+                cropped_imgs.append(cropped_img)
+        
+        flat_labels = self.classifier.batchGetAttributes(cropped_imgs)
+        # need to make it 2d array again
+        ret = []
+        for i in range(len(images)):
+            grouped = []
+            for j in range(3):
+                grouped.append(flat_labels[i * 3 + j])
+            ret.append(grouped)
+        print(ret)
+        return ret
+            
     def getLabels(self, image):
         detections, c_index = self.detector.getLabels(image)
         bboxes = detections['detection_boxes'][0].numpy()
@@ -37,16 +65,14 @@ class ClothingRecognitionModel:
                           min(ymax * im_height, im_height))
             cropped_img = image.crop(dimensions)
             cropped_img.save('cropped' + str(i) + '.png')
-            predicted_class, probability, color = self.classifier.getAttributes(cropped_img)
-            labels.append(predicted_class)
+            predicted_classes, probabilities, color = self.classifier.getAttributes(cropped_img)
+            labels.append(predicted_classes)
             colors.append(color)
-            print("detector prediction:", c_index[classes[i]+1], "classifier predicion:", predicted_class)
-            print("detector acc:", scores[i], "classifier acc:", probability)
-            print("color: ", color)
+
         return labels, colors
         
 if __name__ == '__main__':
     crm = ClothingRecognitionModel()
     image = Image.open('test.jpg').convert("RGB")
-    crm.getLabels(image)
+    print(crm.getLabels(image))
     print("test completed.")
