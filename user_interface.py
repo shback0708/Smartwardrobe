@@ -10,6 +10,7 @@ from PIL import Image
 import matching as matching
 import visualizer.webscraper as ws
 import visualizer.visualizer as vi
+import user_preference.user_preference as up
 
 app = Flask(__name__)
 nav = Nav(app)
@@ -32,6 +33,8 @@ vapi = ""
 final_clothes = []
 final_color = []
 
+clothes_combination_string = ""
+
 @app.route("/")
 def index():
     return redirect(url_for('home'))
@@ -52,8 +55,8 @@ def add():
         # This is where we get the color and type_of_clothes
         image = Image.open(img_file).convert("RGB")
         temp_label, temp_color = crm.getLabels(image)
-        cur_type_of_clothes = temp_label[0]
-        cur_color = temp_color[0]
+        cur_type_of_clothes = temp_label[0][0]
+        cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         sc.rotate_servo(cur_angle, i * 9)
@@ -69,7 +72,8 @@ def update_add():
         # here I will update the database
         preference = request.form["nm"]
         i = db.find_index_to_add(database)
-        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference)
+        clothing_type = vapi.getClothingType(cur_type_of_clothes)
+        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
         cur_angle = i * 9
         return redirect(url_for('home'))
 
@@ -120,8 +124,8 @@ def ret():
         # This is where we get the color and type_of_clothes
         image = Image.open(img_file).convert("RGB")
         temp_label, temp_color = crm.getLabels(image)
-        cur_type_of_clothes = temp_label[0]
-        cur_color = temp_color[0]
+        cur_type_of_clothes = temp_label[0][0]
+        cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         sc.rotate_servo(cur_angle, i * 9)
@@ -137,13 +141,61 @@ def update_ret():
         # here I will update the database
         preference = request.form["nm"]
         i = db.find_index_to_add(database)
-        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference)
+        clothing_type = vapi.getClothingType(cur_type_of_clothes)
+        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
         cur_angle = i * 9
-        return redirect(url_for('home'))
+        if clothing_type != 2:
+            clothes_combination_string = cur_color + cur_type_of_clothes
+            return redirect(url_for('ret2'))
+        else:
+            # Here we will update the combination
+            clothes_combination_string = (cur_color + cur_type_of_clothes)
+            up.setRating(preference, clothes_combination_string)
+            return redirect(url_for('home'))
 
     else:
         print("going to update_ret.html")
         return render_template("update_ret.html")
+
+# When we're returning clothes, we might be returning
+# top and bottom at the same time
+# This will deal with returning 2 clothes
+# and asking for the preference
+@app.route("/ret2", methods=["POST", "GET"])
+def ret2():
+    if request.method == "POST":
+        img_file = request.form["img"]
+        # This is where we get the color and type_of_clothes
+        image = Image.open(img_file).convert("RGB")
+        temp_label, temp_color = crm.getLabels(image)
+        cur_type_of_clothes = temp_label[0][0]
+        cur_color = webs.get_colour_name(temp_color[0])
+        # we don't add clothes to the database here yet
+        i = db.find_index_to_add(database)
+        sc.rotate_servo(cur_angle, i * 9)
+        return redirect(url_for('update_ret2'))
+
+    else: 
+        print("going to ret2.html")   
+        return render_template("ret2.html")
+
+@app.route("/update_ret2", methods=["POST", "GET"])
+def update_ret2():
+    if request.method == "POST":
+        # here I will update the database
+        preference_for_combination = request.form["nm"]
+        i = db.find_index_to_add(database)
+        clothing_type = vapi.getClothingType(cur_type_of_clothes)
+        db.add_to_database(database, i, cur_type_of_clothes, cur_color, 5, clothing_type)
+        cur_angle = i * 9
+        # Here we will update the combination
+        clothes_combination_string += (cur_color + cur_type_of_clothes)
+        up.setRating(preference, clothes_combination_string)  
+        return redirect(url_for('home'))
+
+    else:
+        print("going to update_ret2.html")
+        return render_template("update_ret2.html")
 
 # I will implement checkboxes
 @app.route("/take", methods=["POST", "GET"])
@@ -160,8 +212,6 @@ def take():
         r, g, b = request.form("red"), request.form("green"), request.form("blue")
         final_color += [r, g, b]
         return redirect(url_for('show_take'))
-        
-        # It's ur turn to do the integration Hlin1
     else:   
         print("going to take.html")
         return render_template("take.html", class_lookup = class_lookup)
@@ -184,15 +234,17 @@ def show_take():
         # Call the matching API
         clothes_to_take = matching.setFilter(final_clothes, nearest_color)
         # Call the preference API using the clothes_to_take
-        # do something
+        combinations = matching.getMatches(clothes_to_take)
 
-        # call the visualizerAPI using clothes_to_take
-        # The integration here is going to be a bitch
-        for clothes_img in clothes_to_take:
+        # combinations here will be a set of strings that will look like
+        #("blueshirtredpants", "whitejacketbluejeans")
+        
+        # call the visualizerAPI using combinations
+        # using these clothes combinations, we will get the corresponding image
+        for clothes_img in combinations:
             outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
 
-        outfitImages = [test1.jpg, test2.jpg]
-        return render_template("show_take.html", imgs = images)
+        return render_template("show_take.html", imgs = outfitImages)
 
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():
