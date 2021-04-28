@@ -84,7 +84,7 @@ class VisualizerAPI:
         elif category in onepieces:
             return 2
         else:
-            raise Exception("unknown clothing type: ", category)
+            raise Exception("unknown clothing type: " + category)
 
     def getOutfitImgs(self, labels, num):
         outfits = []

@@ -56,12 +56,14 @@ def home():
 
 @app.route("/add", methods=["POST", "GET"])
 def add():
+    global cur_type_of_clothes
+
     if request.method == "POST":
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
         print(img_file)
         image = Image.open(img_file).convert("RGB")
-        temp_label, temp_color = cc.getAttributes(image)
+        temp_label, _, temp_color = cc.getAttributes(image)
         print(temp_label, temp_color)
         cur_type_of_clothes = temp_label[0]
         cur_color = webs.get_colour_name(temp_color)
@@ -80,6 +82,7 @@ def update_add():
         # here I will update the database
         preference = request.form["nm"]
         i = db.find_index_to_add(database)
+        print("cur_type: ", cur_type_of_clothes)
         clothing_type = vi.VisualizerAPI.getClothingType(cur_type_of_clothes)
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
         cur_angle = i * 9
@@ -131,8 +134,8 @@ def ret():
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
         image = Image.open(img_file).convert("RGB")
-        temp_label, temp_color = cc.getAttributes(image)
-        cur_type_of_clothes = temp_label[0][0]
+        temp_label, _, temp_color = cc.getAttributes(image)
+        cur_type_of_clothes = temp_label[0]
         cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
