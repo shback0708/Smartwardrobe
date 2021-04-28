@@ -24,6 +24,8 @@ class WebScraper:
     query = ""
     chrome_options = Options()
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_argument('--ignore-ssl-errors')
     driver = webdriver.Chrome(path, options = chrome_options)
     driver.maximize_window()
     driver.get(link)
@@ -35,13 +37,16 @@ class WebScraper:
       query = color + " " + label + " " + color1 + " " + label1
       
     else:
-      color = self.get_colour_name(labels[5])
-      label = labels[0]
+      color = self.get_colour_name(labels[0][5])
+      label = labels[0][0]
       query = color + " " + label
     driver.find_element_by_xpath('//*[@id="sbtc"]/div/div[2]/input').send_keys(query)
     driver.find_element_by_xpath('//*[@id="sbtc"]/button').click()
     time.sleep(.5)
     images = driver.find_elements_by_class_name('rg_i')
+    while (len(images) < limit + offset):
+      driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+      images = driver.find_elements_by_class_name('rg_i')
     count = 0
     for image in images:
       try:
@@ -57,7 +62,7 @@ class WebScraper:
           count += 1
           if (count >= offset):
             links.append(link)
-        if(count == limit):
+        if(count == limit + offset):
           break
       except:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -86,6 +91,6 @@ class WebScraper:
   
 if __name__ == '__main__':
     ws = WebScraper()
-    ws.scrapeOutfits((("shirt", "flannel", "a", "b", "c", (0,0,0)), ("jeans", "long", "a", "b", "c", (0,0,255))), 50)
-    #ws.scrapeOutfits(("dress", "a", "b", "c", "d", (200,0,0)), 80)
+    ws.scrapeOutfits((("shirt", "flannel", "a", "b", "c", (0,0,0)), ("jeans", "long", "a", "b", "c", (0,0,255))), 100)
+    #ws.scrapeOutfits((("dress", "a", "b", "c", "d", (200,0,0)), 80),)
     print("test completed.")

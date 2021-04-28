@@ -26,9 +26,7 @@ filenames = list(pathlib.Path(os.path.join(os.path.dirname(__file__),'models/'))
 filenames.sort()
 
 def  get_model_detection_function(model):
-  """Get a tf.function for detection."""
 
-  @tf.function
   def detect_fn(image):
     """Detect objects in image."""
 
@@ -80,22 +78,22 @@ class ClothingDetector:
             use_display_name=True)
         category_index = label_map_util.create_category_index(categories)
     
-        label_id_offset = 1
-        image_np_with_detections = image_np.copy()
-        viz_utils.visualize_boxes_and_labels_on_image_array(
-            image_np_with_detections,
-            detections['detection_boxes'][0].numpy(),
-            (detections['detection_classes'][0].numpy() + label_id_offset).astype(int),
-            detections['detection_scores'][0].numpy(),
-            category_index,
-            use_normalized_coordinates=True,
-            max_boxes_to_draw=8,
-            min_score_thresh=0.4,
-            agnostic_mode=False,
-        )
-        plt.figure(figsize=(12,16))
-        plt.imshow(image_np_with_detections)
-        plt.savefig('res.png')
+        # label_id_offset = 1
+        # image_np_with_detections = image_np.copy()
+        # viz_utils.visualize_boxes_and_labels_on_image_array(
+        #     image_np_with_detections,
+        #     detections['detection_boxes'][0].numpy(),
+        #     (detections['detection_classes'][0].numpy() + label_id_offset).astype(int),
+        #     detections['detection_scores'][0].numpy(),
+        #     category_index,
+        #     use_normalized_coordinates=True,
+        #     max_boxes_to_draw=8,
+        #     min_score_thresh=0.4,
+        #     agnostic_mode=False,
+        # )
+        # plt.figure(figsize=(12,16))
+        # plt.imshow(image_np_with_detections)
+        # plt.savefig('res.png')
         return detections, category_index
 
 
