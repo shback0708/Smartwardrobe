@@ -13,18 +13,20 @@ import time
 def setFilter(category, color):
     final = []
     for i in category:
-        for j in color:
-            clothes = db.match_type_or_color(i,j)
-            if clothes != -1:
-                if clothes != final:
-                    final += [clothes]
+        clothes = db.match_type_or_color(i,color)
+        if clothes != -1:
+            if clothes != final:
+                final += [clothes]
 
     return final
 
 # returns images of the best outfits 
 # output_of_setFilter will be a 2D array
 # output of getMatches will be all the images displayed to the user
-def getMatches(output_of_setFilter):
+# def getMatches(output_of_setFilter):
+
+# we don't need this part because the rest 
+# will be handled by the preferences model
     
 
 
