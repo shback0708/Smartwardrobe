@@ -20,7 +20,7 @@ height,width = 240,240
 
 class ClothingClassifier:
     model = None
-
+    
     def __init__(self):
         #load latest checkpoint
         fn = os.path.join(os.path.dirname(__file__), model_dir)

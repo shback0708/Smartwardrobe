@@ -11,7 +11,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recogniti
 from clothing_recognition import clothing_recognizer as cr
 import webscraper as ws
 # storagefilename = 'imagestorage.pickle'
-
+tops = ['Anorak', 'Blazer', 'Bomber', 'Button-Down', 'Cardigan', 'Coat', 'Flannel', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jersey', 'Parka', 'Peacoat', 'Poncho', 'Sweater',  'Tank', 'Tee', 'Top', 'Turtleneck']
+bottoms = ['Capris', 'Chinos', 'Culottes', 'Cutoffs', 'Gauchos', 'Jeans', 'Jeggings', 'Jodhpurs', 'Joggers', 'Leggings', 'Sarong', 'Shorts', 'Skirt', 'Sweatpants', 'Sweatshorts', 'Trunks']
+onepieces = ['Caftan', 'Coverup', 'Dress', 'Jumpsuit', 'Kaftan', 'Kimono', 'Onesie', 'Robe', 'Romper']
 class VisualizerAPI:
     imageStorage = None
     clothingRecModel = None
@@ -70,6 +72,18 @@ class VisualizerAPI:
                 correctness += 0.5 ** (i + 1)
         correctness -= VisualizerAPI.colorError(color1, color2) / 10
         return correctness
+
+    # returns 0 if its a top, 1 if its a bottom, or 2 if its a one-piece
+    @staticmethod
+    def getClothingType(self, category):
+        if category in tops:
+            return 0
+        elif category in bottoms:
+            return 1
+        elif category in onepieces:
+            return 2
+        else:
+            raise Exception("unknown clothing type: ", category)
 
     def getOutfitImgs(self, labels, num):
         outfits = []
