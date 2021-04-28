@@ -7,9 +7,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__),'..'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recognition'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recognition/detector'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__),'../clothing_recognition/classifier'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__),'..'))
 
 from clothing_recognition import clothing_recognizer as cr
-import webscraper as ws
+import visualizer.webscraper as ws
 # storagefilename = 'imagestorage.pickle'
 tops = ['Anorak', 'Blazer', 'Bomber', 'Button-Down', 'Cardigan', 'Coat', 'Flannel', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jersey', 'Parka', 'Peacoat', 'Poncho', 'Sweater',  'Tank', 'Tee', 'Top', 'Turtleneck']
 bottoms = ['Capris', 'Chinos', 'Culottes', 'Cutoffs', 'Gauchos', 'Jeans', 'Jeggings', 'Jodhpurs', 'Joggers', 'Leggings', 'Sarong', 'Shorts', 'Skirt', 'Sweatpants', 'Sweatshorts', 'Trunks']

@@ -1,11 +1,17 @@
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__),'/clothing_recognition'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__),'/clothing_recognition/detector'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__),'/clothing_recognition/classifier'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__),'/visualizer'))
+
 from flask import Flask, render_template, redirect, url_for, request
 from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 import database.database as db
-import retriever.servo_control as sc
-import clothing_recognition.clothing_recognizer as cr
+# import retriever.servo_control as sc
 import time
-import serial
+# import serial
 from PIL import Image
 import matching as matching
 import visualizer.webscraper as ws
@@ -53,13 +59,15 @@ def add():
     if request.method == "POST":
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
+        print(img_file)
         image = Image.open(img_file).convert("RGB")
         temp_label, temp_color = crm.getLabels(image)
+        print(temp_label, temp_color)
         cur_type_of_clothes = temp_label[0][0]
         cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
-        sc.rotate_servo(cur_angle, i * 9)
+        # sc.rotate_servo(cur_angle, i * 9)
         return redirect(url_for('update_add'))
 
     else: 
@@ -92,7 +100,7 @@ def remove():
         print(cur_color, cur_type_of_clothes)
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
         if i != -1:
-            sc.rotate_servo(cur_angle, i * 9)
+            # sc.rotate_servo(cur_angle, i * 9)
             return redirect(url_for('update_remove'))
         else:
             print ("couldn't find the clothes for some reason")
@@ -128,7 +136,7 @@ def ret():
         cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
-        sc.rotate_servo(cur_angle, i * 9)
+        # sc.rotate_servo(cur_angle, i * 9)
         return redirect(url_for('update_ret'))
 
     else: 
@@ -172,7 +180,7 @@ def ret2():
         cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
-        sc.rotate_servo(cur_angle, i * 9)
+        # sc.rotate_servo(cur_angle, i * 9)
         return redirect(url_for('update_ret2'))
 
     else: 
@@ -222,7 +230,7 @@ def show_take():
         # cur_type_of_clothes, cur_color = get_from_picture()
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
         if i != -1:
-            sc.rotate_servo(cur_angle, i * 9)
+            # sc.rotate_servo(cur_angle, i * 9)
             return redirect(url_for('update_take'))
         else:
             print ("couldn't find the clothes for some reason")
@@ -264,8 +272,8 @@ if __name__ == "__main__":
     db.init_database(database)
     db.print_database(database)
     cur_angle = 0
-    crm = cr.ClothingRecognitionModel()
     vapi = vi.VisualizerAPI()
+    crm = vapi.clothingRecModel
     webs = ws.WebScraper()
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)
