@@ -34,7 +34,7 @@ cur_angle = 0
 cur_type_of_clothes = ""
 cur_color = ""
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
-crm = ""
+cc = ""
 vapi = ""
 final_clothes = []
 final_color = []
@@ -61,10 +61,10 @@ def add():
         # This is where we get the color and type_of_clothes
         print(img_file)
         image = Image.open(img_file).convert("RGB")
-        temp_label, temp_color = crm.getLabels(image)
+        temp_label, temp_color = cc.getAttributes(image)
         print(temp_label, temp_color)
-        cur_type_of_clothes = temp_label[0][0]
-        cur_color = webs.get_colour_name(temp_color[0])
+        cur_type_of_clothes = temp_label[0]
+        cur_color = webs.get_colour_name(temp_color)
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         # sc.rotate_servo(cur_angle, i * 9)
@@ -80,7 +80,7 @@ def update_add():
         # here I will update the database
         preference = request.form["nm"]
         i = db.find_index_to_add(database)
-        clothing_type = vapi.getClothingType(cur_type_of_clothes)
+        clothing_type = vi.VisualizerAPI.getClothingType(cur_type_of_clothes)
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
         cur_angle = i * 9
         return redirect(url_for('home'))
@@ -131,7 +131,7 @@ def ret():
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
         image = Image.open(img_file).convert("RGB")
-        temp_label, temp_color = crm.getLabels(image)
+        temp_label, temp_color = cc.getAttributes(image)
         cur_type_of_clothes = temp_label[0][0]
         cur_color = webs.get_colour_name(temp_color[0])
         # we don't add clothes to the database here yet
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     db.print_database(database)
     cur_angle = 0
     vapi = vi.VisualizerAPI()
-    crm = vapi.clothingRecModel
+    cc = vapi.clothingRecModel.classifier
     webs = ws.WebScraper()
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)

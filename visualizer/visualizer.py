@@ -76,7 +76,7 @@ class VisualizerAPI:
 
     # returns 0 if its a top, 1 if its a bottom, or 2 if its a one-piece
     @staticmethod
-    def getClothingType(self, category):
+    def getClothingType(category):
         if category in tops:
             return 0
         elif category in bottoms:
