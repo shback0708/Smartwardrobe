@@ -3,8 +3,13 @@ from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 import database.database as db
 import retriever.servo_control as sc
+import clothing_recognization.clothing_recognizer as cr
 import time
 import serial
+from PIL import Image
+import matching as matching
+import visualizer.webscraper as ws
+import visualizer.visualizer as vi
 
 app = Flask(__name__)
 nav = Nav(app)
@@ -22,6 +27,10 @@ cur_angle = 0
 cur_type_of_clothes = ""
 cur_color = ""
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
+crm = ""
+vapi = ""
+final_clothes = []
+final_color = []
 
 @app.route("/")
 def index():
@@ -40,11 +49,11 @@ def home():
 def add():
     if request.method == "POST":
         img_file = request.form["img"]
-        # Henry this part is where you need to do the integration
-        # type_of_clothes, color = post_request(img_file) 
-        # set the global variables here
-        cur_type_of_clothes = "tshirt"
-        cur_color = "blue"
+        # This is where we get the color and type_of_clothes
+        image = Image.open(img_file).convert("RGB")
+        temp_label, temp_color = crm.getLabels(image)
+        cur_type_of_clothes = temp_label[0]
+        cur_color = temp_color[0]
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         sc.rotate_servo(cur_angle, i * 9)
@@ -108,10 +117,11 @@ def update_remove():
 def ret():
     if request.method == "POST":
         img_file = request.form["img"]
-        # call the visualizer API here with the img_file
-        # type_of_clothes, color = visualizerapi(img_file) 
-        cur_type_of_clothes = "tshirt"
-        cur_color = "blue"
+        # This is where we get the color and type_of_clothes
+        image = Image.open(img_file).convert("RGB")
+        temp_label, temp_color = crm.getLabels(image)
+        cur_type_of_clothes = temp_label[0]
+        cur_color = temp_color[0]
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         sc.rotate_servo(cur_angle, i * 9)
@@ -141,14 +151,14 @@ def take():
     if request.method == "POST":
         clothes = request.form["clothes"]
         cl = clothes.split("clothes=")
-        finalClothes = []
+        final_clothes = []
         for c in cl:
             if c[-1] == '&':
-                finalClothes += [c[:-1]]
+                final_clothes += [c[:-1]]
             else:
-                finalClothes += [c]
+                final_clothes += [c]
         r, g, b = request.form("red"), request.form("green"), request.form("blue")
-        finalClothes += [r, g, b]
+        final_color += [r, g, b]
         return redirect(url_for('show_take'))
         
         # It's ur turn to do the integration Hlin1
@@ -169,12 +179,20 @@ def show_take():
             return redirect(url_for('home'))
         
     else:
-        # Here I will show all the pictures of clothes that I can choose from
+        # convert [R, G, B] into nearest color
+        nearest_color = webs.get_colour_name(final_color)
         # Call the matching API
-        # Call the preference API
-        cur_type_of_clothes = "tshirt"
-        cur_color = "red"
-        return render_template("show_take.html")
+        clothes_to_take = matching.setFilter(final_clothes, nearest_color)
+        # Call the preference API using the clothes_to_take
+        # do something
+
+        # call the visualizerAPI using clothes_to_take
+        # The integration here is going to be a bitch
+        for clothes_img in clothes_to_take:
+            outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
+
+        outfitImages = [test1.jpg, test2.jpg]
+        return render_template("show_take.html", imgs = images)
 
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():
@@ -208,6 +226,9 @@ if __name__ == "__main__":
     db.init_database(database)
     db.print_database(database)
     cur_angle = 0
+    crm = cr.ClothingRecognitionModel()
+    vapi = vi.VisualizerAPI()
+    webs = ws.WebScraper()
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)
     
