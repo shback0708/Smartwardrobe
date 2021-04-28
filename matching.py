@@ -1,5 +1,5 @@
 import database.database as db
-import retriever.servo_control as sc
+import user_preference.user_preference as up
 import time
 # This will be the stub file for matching api
 
@@ -23,11 +23,12 @@ def setFilter(category, color):
 # returns images of the best outfits 
 # output_of_setFilter will be a 2D array
 # output of getMatches will be all the images displayed to the user
-# def getMatches(output_of_setFilter):
+def getMatches(output_of_setFilter):
+    final = []
+    # use output_of_setFilter to find every single clothing combination
 
-# we don't need this part because the rest 
-# will be handled by the preferences model
-    
+    # make sure to call getFilter to organize the combination
 
+    return final
 
 
