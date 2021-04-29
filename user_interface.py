@@ -277,9 +277,9 @@ def show_take():
         # convert [R, G, B] into nearest color
         nearest_color = webs.get_colour_name(final_color)
         # Call the matching API
-        clothes_to_take = matching.setFilter(final_clothes, nearest_color)
+        clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
         # Call the preference API using the clothes_to_take
-        combinations = matching.getMatches(vapi, database, clothes_to_take)
+        combinations = matching.getMatches(database, clothes_to_take)
 
         # combinations here will be a set of strings that will look like
         #("blueshirtredpants", "whitejacketbluejeans")

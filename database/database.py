@@ -90,11 +90,25 @@ def find_clothes_index(database, type_of_clothes, color):
             return -1
 
 def match_type_or_color(database, type_of_clothes, color):
+    final = []
     for i in range(len(database)):
         if ((database[i].type_of_clothes == type_of_clothes) or (database[i].color == color)):
-            return database[i]
-        else:
-            return -1
+            final.append(database[i])
+    return final
+
+def match_type(database, type_of_clothes):
+    final = []
+    for i in range(len(database)): 
+        if ((database[i].type_of_clothes == type_of_clothes)):
+            final.append(database[i])
+    return final
+
+def match_color(database, color):
+    final = []
+    for i in range(len(database)):   
+        if (database[i].color == color):
+            final.append(database[i])
+    return final
 
 def remove_from_database(database, index):
     database[index].angle = -1
