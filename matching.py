@@ -4,33 +4,35 @@ import time
 # This will be the stub file for matching api
 
 
+
 # we get the categories of clothes, and the colors of clothes
 # category and clothes will be lists
 
 # user inputed specs like jeans-only or black top
 # This function will call the database and return all the combinations
 
-def setFilter(category, color):
-    final = []
+def setFilter(category, color, database):
+    final = set()
+    t = db.match_color(database, color)
+    if(t != []):
+        final.add(t[0].color + "," + t[0].type_of_clothes)
     for i in category:
-        clothes = db.match_type_or_color(i,color)
-        if clothes != -1:
-            if clothes != final:
-                final += [clothes.color + "," + clothes.type_of_clothes]
-
+        clothes = db.match_type(database, i)
+        for cloth in clothes:
+            final.add(cloth.color + "," + cloth.type_of_clothes)
     return final
 
 # returns images of the best outfits 
 # output_of_setFilter will be a 2D array
 # output of getMatches will be all the images displayed to the user
 # final will look like [[]]
-def getMatches(vapi, database, output_of_setFilter):
+def getMatches(database, output_of_setFilter):
     good_rating = set()
     no_rating = set()
     bad_rating = set()
     for c in output_of_setFilter:
         color, type_of_clothes = c.split(",")
-        clothing_type = vapi.getClothingType(type_of_clothes)
+        clothing_type = getClothingType(type_of_clothes)
         # this means it's a top
         # we need to add suggestions for the bottom
         if clothing_type == 0:
@@ -91,3 +93,17 @@ def getMatches(vapi, database, output_of_setFilter):
     return final
 
 
+#returns type of clothing
+#0 for tops, 1 for bottoms, 2 for onepieces
+def getClothingType(category):
+    tops = ['Anorak', 'Blazer', 'Bomber', 'Button-Down', 'Cardigan', 'Coat', 'Flannel', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jersey', 'Parka', 'Peacoat', 'Poncho', 'Sweater',  'Tank', 'Tee', 'Top', 'Turtleneck']
+    bottoms = ['Capris', 'Chinos', 'Culottes', 'Cutoffs', 'Gauchos', 'Jeans', 'Jeggings', 'Jodhpurs', 'Joggers', 'Leggings', 'Sarong', 'Shorts', 'Skirt', 'Sweatpants', 'Sweatshorts', 'Trunks']
+    onepieces = ['Caftan', 'Coverup', 'Dress', 'Jumpsuit', 'Kaftan', 'Kimono', 'Onesie', 'Robe', 'Romper']
+    if category in tops:
+        return 0
+    elif category in bottoms:
+        return 1
+    elif category in onepieces:
+        return 2
+    else:
+        raise Exception("unknown clothing type: " + category)
