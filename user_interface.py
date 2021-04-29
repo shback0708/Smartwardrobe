@@ -9,13 +9,13 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 import database.database as db
+import matching as matching
 # import retriever.servo_control as sc
 import time
 # import serial
 from PIL import Image
-import matching as matching
-import visualizer.webscraper as ws
-import visualizer.visualizer as vi
+#import visualizer.webscraper as ws
+#import visualizer.visualizer as vi
 import user_preference.user_preference as up
 
 app = Flask(__name__)
@@ -52,21 +52,38 @@ def home():
         return redirect(url_for(type_of_action))
     else: # request is get
         print("going to home.html")
-        return render_template("home.html")
+
+        # need to make the array of inside_db_img
+        return render_template("home.html", imgs = inside_db_img)
 
 @app.route("/add", methods=["POST", "GET"])
 def add():
     global cur_type_of_clothes
+    global cur_color
 
     if request.method == "POST":
-        img_file = request.form["img"]
-        # This is where we get the color and type_of_clothes
-        print(img_file)
-        image = Image.open(img_file).convert("RGB")
-        temp_label, _, temp_color = cc.getAttributes(image)
-        print(temp_label, temp_color)
-        cur_type_of_clothes = temp_label[0]
-        cur_color = webs.get_colour_name(temp_color)
+        f = request.files["img"]
+
+        # image = Image.open(img_file).convert("RGB")
+        # temp_label, _, temp_color = cc.getAttributes(image)
+        # print(temp_label, temp_color)
+        # cur_type_of_clothes = temp_label[0]
+        # cur_color = webs.get_colour_name(temp_color)
+
+        cur_type_of_clothes = "tshirt"
+        cur_color = "red"
+
+        # I want to save the image file name as 
+        # cur_color + cur_type_of_clothes
+        
+        # rename img_file
+        img_name = cur_color + cur_type_of_clothes + ".jpg"
+        # save this image file in db_img
+        f.save(os.path.join("db_img", img_name))
+
+        # use os.path and figure it out
+
+
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         # sc.rotate_servo(cur_angle, i * 9)
@@ -78,9 +95,16 @@ def add():
 
 @app.route("/update_add", methods=["POST", "GET"])
 def update_add():
+    global database
+    global cur_angle
+
     if request.method == "POST":
         # here I will update the database
         preference = request.form["nm"]
+        if int(preference) < 5:
+            preference = "-1"
+        else:
+            preference = "1"
         i = db.find_index_to_add(database)
         print("cur_type: ", cur_type_of_clothes)
         clothing_type = vi.VisualizerAPI.getClothingType(cur_type_of_clothes)
@@ -151,6 +175,11 @@ def update_ret():
     if request.method == "POST":
         # here I will update the database
         preference = request.form["nm"]
+        if int(preference) < 5:
+            preference = "-1"
+        else:
+            preference = "1"
+
         i = db.find_index_to_add(database)
         clothing_type = vapi.getClothingType(cur_type_of_clothes)
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
@@ -195,6 +224,11 @@ def update_ret2():
     if request.method == "POST":
         # here I will update the database
         preference_for_combination = request.form["nm"]
+        if int(preference) < 5:
+            preference = "-1"
+        else:
+            preference = "1"
+
         i = db.find_index_to_add(database)
         clothing_type = vapi.getClothingType(cur_type_of_clothes)
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, 5, clothing_type)
@@ -272,6 +306,12 @@ def update_take():
 
 if __name__ == "__main__":
     print("starting smartwardrobe")
+    # globals
+    global database
+    global cur_angle
+    global vapi
+    global cc
+    global webs
     db.init_database(database)
     db.print_database(database)
     cur_angle = 0
