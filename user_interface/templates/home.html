@@ -2,18 +2,21 @@
 
 {% block body %}
 <h1>Smart Wardrobe</h1>
+    <p>These are all the clothes in your database</p>
+
+    {% for name in imgs %}
+        <img src = "{{url_for('static', filename = 'db_img/' + name) }}">
+    {% endfor %}
+
+    <p>hello</p>
+
     <p>Type in the action you would like to perform</p>
-    <p>Options are add, remove, ret, and take</p>
+    <p>hello</p>
+    <p>Options are add, remove, ret for return, and take</p>
     <form action = "#" method = "post">
         <p>Action:</p>
         <p><input type="text" name="nm"/></p>
         <p><input type="submit" value = "submit"/></p>
     </form>
-    
-    <p>These are all the clothes that are in the Smart Wardrobe</p>
-    {% for name in imgs %}
-        <img src = "{{url_for('static', filename = 'db_img/' + name )}}">
-    {% endfor %}
 
-    
 {% endblock %}

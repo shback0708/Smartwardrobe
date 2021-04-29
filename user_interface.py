@@ -52,9 +52,10 @@ def home():
         return redirect(url_for(type_of_action))
     else: # request is get
         print("going to home.html")
-
         # need to make the array of inside_db_img
-        return render_template("home.html", imgs = inside_db_img)
+        imgs = db.create_home_display(database)
+        #imgs = ["redtshirt.jpg", "bluejeen.jpg"]
+        return render_template("home.html", imgs = imgs)
 
 @app.route("/add", methods=["POST", "GET"])
 def add():
@@ -70,8 +71,8 @@ def add():
         # cur_type_of_clothes = temp_label[0]
         # cur_color = webs.get_colour_name(temp_color)
 
-        cur_type_of_clothes = "tshirt"
-        cur_color = "red"
+        # cur_type_of_clothes = "tshirt"
+        # cur_color = "red"
 
         # I want to save the image file name as 
         # cur_color + cur_type_of_clothes

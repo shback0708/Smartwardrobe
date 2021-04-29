@@ -11,6 +11,9 @@ import time
 app = Flask(__name__)
 nav = Nav(app)
 
+# picFolder = os.path.join('static', 'db_img')
+# app.config['UPLOAD_FOLDER'] = picFolder
+
 nav.register_element('my_navbar', Navbar('thenav', 
 View('Home', 'home'), 
 View('Add', 'add'), 
@@ -26,6 +29,7 @@ class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan",
 def index():
     return redirect(url_for('home'))
 
+
 @app.route("/home", methods=["POST", "GET"])
 def home():
     if request.method == "POST":
@@ -33,9 +37,11 @@ def home():
         return redirect(url_for(type_of_action))
     else: # request is get
         print("going to home.html")
-
         # need to make the array of inside_db_img
-        return render_template("home.html")
+        imgs = db.create_home_display(database)
+        #imgs = ["redtshirt.jpg", "bluejeen.jpg"]
+
+        return render_template("home.html", imgs = imgs)
 
 @app.route("/add", methods=["POST", "GET"])
 def add():
@@ -65,7 +71,7 @@ def add():
         # rename img_file
         img_name = cur_color + cur_type_of_clothes + ".jpg"
         # save this image file in db_img
-        f.save(os.path.join("db_img", img_name))
+        f.save(os.path.join("static/db_img", img_name))
 
         # use os.path and figure it out
 

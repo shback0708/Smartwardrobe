@@ -110,6 +110,14 @@ def match_color(database, color):
             final.append(database[i])
     return final
 
+def create_home_display(database):
+    final = []
+    for clothes in database:
+        if clothes.angle != 1:
+            temp = clothes.color + clothes.type_of_clothes + ".jpg"
+            final.append(temp)
+    return final
+
 def remove_from_database(database, index):
     database[index].angle = -1
     database[index].type_of_clothes = "removed"
