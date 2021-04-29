@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Please confirm the type of clothes you would like to add</h1>
+    <p>Choose the correct category of the clothes</p>
+
+    <form method = "post">
+        <label for="correct">Press done when you finish your selection:</label>
+        <select name="correct">
+        {% for clothes in clothes_option %}
+            <option>{{ clothes }}</option>
+        {% endfor %}
+        </select>
+        <p><input type="submit" value = "done"/></p>
+    </form>
+
+{% endblock %}

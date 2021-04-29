@@ -22,6 +22,7 @@ View('Return', 'ret'),
 View('Take', 'take')
 ))
 database = []
+clothes_option = []
 
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
 
@@ -43,38 +44,50 @@ def home():
 
         return render_template("home.html", imgs = imgs)
 
+
 @app.route("/add", methods=["POST", "GET"])
 def add():
     global cur_type_of_clothes
+    global cur_color
+    global clothes_option
 
     if request.method == "POST":
-        #img_file = request.form["img"]
-        # This is where we get the color and type_of_clothes
-        #print("image file is ")
-        #print(img_file)
-        
         f = request.files["img"]
 
-
-        # image = Image.open(img_file).convert("RGB")
-        # temp_label, _, temp_color = cc.getAttributes(image)
-        # print(temp_label, temp_color)
-        # cur_type_of_clothes = temp_label[0]
-        # cur_color = webs.get_colour_name(temp_color)
-
         cur_type_of_clothes = "tshirt"
-        cur_color = "red"
+        cur_color = "green"
 
-        # I want to save the image file name as 
-        # cur_color + cur_type_of_clothes
-        
-        # rename img_file
         img_name = cur_color + cur_type_of_clothes + ".jpg"
         # save this image file in db_img
         f.save(os.path.join("static/db_img", img_name))
 
-        # use os.path and figure it out
+        clothes_option = ["tshirt", "jacket"]
 
+        return redirect(url_for('confirm_add'))
+
+    else: 
+        print("going to add.html")   
+        return render_template("add.html")
+
+@app.route("/confirm_add", methods=["POST", "GET"])
+def confirm_add():
+    global cur_type_of_clothes
+
+    if request.method == "POST":
+        
+        # first we check if clothes option is correct
+        temp = request.form.getlist("correct")
+        
+        if cur_type_of_clothes != temp[0]:
+            print("image processing not successful")
+            # the image procesing was not successful
+            # we have to rename using os
+            old_img_dir = "static/db_img/" + cur_color + cur_type_of_clothes + ".jpg"
+            new_img_dir = "static/db_img/" + cur_color + temp[0] + ".jpg"
+            os.rename(old_img_dir, new_img_dir)
+
+            # now we will have to redefine cur_type_of_clothes to temp
+            cur_type_of_clothes = temp
 
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
@@ -82,8 +95,12 @@ def add():
         return redirect(url_for('update_add'))
 
     else: 
-        print("going to add.html")   
-        return render_template("add.html")
+        print("going to confirm_add.html")   
+        return render_template("confirm_add.html", clothes_option = clothes_option)
+
+@app.route("/update_add", methods=["POST", "GET"])
+def update_add():
+    return render_template("update_add.html")
 
 @app.route("/remove", methods=["POST", "GET"])
 def remove():

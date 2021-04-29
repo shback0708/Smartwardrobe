@@ -14,8 +14,8 @@ import matching as matching
 import time
 # import serial
 from PIL import Image
-#import visualizer.webscraper as ws
-#import visualizer.visualizer as vi
+import visualizer.webscraper as ws
+import visualizer.visualizer as vi
 import user_preference.user_preference as up
 
 app = Flask(__name__)
@@ -40,6 +40,7 @@ final_clothes = []
 final_color = []
 
 clothes_combination_string = ""
+clothes_option = []
 
 @app.route("/")
 def index():
@@ -65,25 +66,45 @@ def add():
     if request.method == "POST":
         f = request.files["img"]
 
-        # image = Image.open(img_file).convert("RGB")
-        # temp_label, _, temp_color = cc.getAttributes(image)
-        # print(temp_label, temp_color)
-        # cur_type_of_clothes = temp_label[0]
-        # cur_color = webs.get_colour_name(temp_color)
+        image = Image.open(img_file).convert("RGB")
+        temp_label, _, temp_color = cc.getAttributes(image)
+        print(temp_label, temp_color)
+        cur_type_of_clothes = temp_label[0]
+        cur_color = webs.get_colour_name(temp_color)
 
         # cur_type_of_clothes = "tshirt"
         # cur_color = "red"
-
-        # I want to save the image file name as 
-        # cur_color + cur_type_of_clothes
         
         # rename img_file
         img_name = cur_color + cur_type_of_clothes + ".jpg"
         # save this image file in db_img
-        f.save(os.path.join("db_img", img_name))
+        f.save(os.path.join("static/db_img", img_name))
 
-        # use os.path and figure it out
+        return redirect(url_for('confirm_add'))
 
+    else: 
+        print("going to add.html")   
+        return render_template("add.html")
+
+@app.route("/confirm_add", methods=["POST", "GET"])
+def confirm_add():
+    global cur_type_of_clothes
+
+    if request.method == "POST":
+        
+        # first we check if clothes option is correct
+        temp = request.form.getlist("correct")
+        
+        if cur_type_of_clothes != temp[0]:
+            print("image processing not successful")
+            # the image procesing was not successful
+            # we have to rename using os
+            old_img_dir = "static/db_img/" + cur_color + cur_type_of_clothes + ".jpg"
+            new_img_dir = "static/db_img/" + cur_color + temp[0] + ".jpg"
+            os.rename(old_img_dir, new_img_dir)
+
+            # now we will have to redefine cur_type_of_clothes to temp
+            cur_type_of_clothes = temp
 
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
@@ -91,8 +112,9 @@ def add():
         return redirect(url_for('update_add'))
 
     else: 
-        print("going to add.html")   
-        return render_template("add.html")
+        print("going to confirm_add.html")   
+        return render_template("confirm_add.html", clothes_option = clothes_option)
+
 
 @app.route("/update_add", methods=["POST", "GET"])
 def update_add():
