@@ -62,6 +62,7 @@ def home():
 def add():
     global cur_type_of_clothes
     global cur_color
+    global clothes_option
 
     if request.method == "POST":
         f = request.files["img"]
