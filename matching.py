@@ -18,6 +18,7 @@ def setFilter(category, color, database):
         final.add(t[0].color + "," + t[0].type_of_clothes)
     for i in category:
         clothes = db.match_type(database, i)
+        print("clothes: ", clothes)
         for cloth in clothes:
             final.add(cloth.color + "," + cloth.type_of_clothes)
     return final

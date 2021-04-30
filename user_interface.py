@@ -67,12 +67,12 @@ def add():
     if request.method == "POST":
         f = request.files["img"]
 
-        image = Image.open(img_file).convert("RGB")
+        image = Image.open(f).convert("RGB")
         temp_label, _, temp_color = cc.getAttributes(image)
         print(temp_label, temp_color)
         cur_type_of_clothes = temp_label[0]
         cur_color = webs.get_colour_name(temp_color)
-
+        clothes_option = temp_label
         # cur_type_of_clothes = "tshirt"
         # cur_color = "red"
         
@@ -269,8 +269,11 @@ def update_ret2():
 # I will implement checkboxes
 @app.route("/take", methods=["POST", "GET"])
 def take():
+    global final_color
+    global final_clothes
     if request.method == "POST":
         clothes = request.form["clothes"]
+        print(clothes)
         cl = clothes.split("clothes=")
         final_clothes = []
         for c in cl:
@@ -278,8 +281,9 @@ def take():
                 final_clothes += [c[:-1]]
             else:
                 final_clothes += [c]
-        r, g, b = request.form("red"), request.form("green"), request.form("blue")
-        final_color += [r, g, b]
+        r, g, b = request.form["red"], request.form["green"], request.form["blue"]
+        final_color = [int(r), int(g), int(b)]
+        print(final_color)
         return redirect(url_for('show_take'))
     else:   
         print("going to take.html")
@@ -301,7 +305,9 @@ def show_take():
         # convert [R, G, B] into nearest color
         nearest_color = webs.get_colour_name(final_color)
         # Call the matching API
+        print(final_clothes, nearest_color)
         clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
+        print("clothes to take: ", clothes_to_take)
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
 
@@ -310,9 +316,9 @@ def show_take():
 
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
+        outfitImages = []
         for clothes_img in combinations:
-            # outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
-            outfitImages = ""
+            outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color, 5)]
         return render_template("show_take.html", imgs = outfitImages)
 
 @app.route("/update_take", methods=["POST", "GET"])
@@ -330,12 +336,6 @@ def update_take():
 
 if __name__ == "__main__":
     print("starting smartwardrobe")
-    # globals
-    global database
-    global cur_angle
-    global vapi
-    global cc
-    global webs
     db.init_database(database)
     db.print_database(database)
     cur_angle = 0
