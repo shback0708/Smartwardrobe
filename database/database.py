@@ -6,13 +6,14 @@ class clothes:
     def __init__(self, angle, type_of_clothes, color, preference, clothing_type):
         self.angle = angle
         self.type_of_clothes = type_of_clothes
-        self.color = color 
+        # color is now a tuple 
+        self.color = color
         self.preference = 0
         self.clothing_type = -1
 
 def init_database(database):
     for i in range(20):
-        database.append(clothes(-1, "tshirt", "red", 0, -1))
+        database.append(clothes(-1, "tshirt", (0,0,0), 0, -1))
     for i in range(20):
         if storage.get(str(i)) != None:
             database[i] = storage.get(str(i))
@@ -90,7 +91,7 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
 
 def find_clothes_index(database, type_of_clothes, color):
     for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) and (database[i].color == color)):
+        if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= 5)):
             return i
         else:
             return -1
@@ -98,7 +99,7 @@ def find_clothes_index(database, type_of_clothes, color):
 def match_type_or_color(database, type_of_clothes, color):
     final = []
     for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) or (database[i].color == color)):
+        if ((database[i].type_of_clothes == type_of_clothes) or (colorError(database[i].color, color) <= 5)):
             final.append(database[i])
     return final
 
@@ -112,7 +113,7 @@ def match_type(database, type_of_clothes):
 def match_color(database, color):
     final = []
     for i in range(len(database)):   
-        if (database[i].color == color):
+        if ((colorError(database[i].color, color) <= 5)):
             final.append(database[i])
     return final
 
@@ -120,14 +121,25 @@ def create_home_display(database):
     final = []
     for clothes in database:
         if clothes.angle != 1:
-            temp = clothes.color + clothes.type_of_clothes + ".jpg"
+            temp = str(clothes.color) + clothes.type_of_clothes + ".jpg"
             final.append(temp)
     return final
 
 def remove_from_database(database, index):
     database[index].angle = -1
     database[index].type_of_clothes = "removed"
-    database[index].color = "removed"
+    database[index].color = (0,0,0)
     database[index].preference = 0
     database[index].clothing_type = -1
     return
+
+def colorError(c1, c2):
+    print(c1,c2)
+    error = 0
+    for i in range(3):
+        error += ((c1[i] - c2[i]) / 255) ** 2 
+    # normalization (0 - 1)
+    error /= 3
+    if error < 0 or error > 1:
+        print(1/0)
+    return error

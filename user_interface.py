@@ -71,13 +71,13 @@ def add():
         temp_label, _, temp_color = cc.getAttributes(image)
         print(temp_label, temp_color)
         cur_type_of_clothes = temp_label[0]
-        cur_color = webs.get_colour_name(temp_color)
+        cur_color = temp_color
 
         # cur_type_of_clothes = "tshirt"
         # cur_color = "red"
         
         # rename img_file
-        img_name = cur_color + cur_type_of_clothes + ".jpg"
+        img_name = str(cur_color) + cur_type_of_clothes + ".jpg"
         # save this image file in db_img
         f.save(os.path.join("static/db_img", img_name))
 
@@ -100,8 +100,8 @@ def confirm_add():
             print("image processing not successful")
             # the image procesing was not successful
             # we have to rename using os
-            old_img_dir = "static/db_img/" + cur_color + cur_type_of_clothes + ".jpg"
-            new_img_dir = "static/db_img/" + cur_color + temp[0] + ".jpg"
+            old_img_dir = "static/db_img/" + str(cur_color) + cur_type_of_clothes + ".jpg"
+            new_img_dir = "static/db_img/" + str(cur_color) + temp[0] + ".jpg"
             os.rename(old_img_dir, new_img_dir)
 
             # now we will have to redefine cur_type_of_clothes to temp
@@ -192,7 +192,7 @@ def ret():
         image = Image.open(img_file).convert("RGB")
         temp_label, _, temp_color = cc.getAttributes(image)
         cur_type_of_clothes = temp_label[0]
-        cur_color = webs.get_colour_name(temp_color[0])
+        cur_color = temp_color[0]
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         # sc.rotate_servo(cur_angle, i * 9)
@@ -220,11 +220,11 @@ def update_ret():
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
         cur_angle = i * 9
         if clothing_type != 2:
-            clothes_combination_string = cur_color + cur_type_of_clothes
+            clothes_combination_string = str(cur_color) + cur_type_of_clothes
             return redirect(url_for('ret2'))
         else:
             # Here we will update the combination
-            clothes_combination_string = (cur_color + cur_type_of_clothes)
+            clothes_combination_string = (str(cur_color) + cur_type_of_clothes)
             up.setRating(preference, clothes_combination_string)
             return redirect(url_for('home'))
 
@@ -247,7 +247,7 @@ def ret2():
         image = Image.open(img_file).convert("RGB")
         temp_label, temp_color = crm.getLabels(image)
         cur_type_of_clothes = temp_label[0][0]
-        cur_color = webs.get_colour_name(temp_color[0])
+        cur_color = temp_color[0]
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
         # sc.rotate_servo(cur_angle, i * 9)
@@ -275,7 +275,7 @@ def update_ret2():
         db.add_to_database(database, i, cur_type_of_clothes, cur_color, 5, clothing_type)
         cur_angle = i * 9
         # Here we will update the combination
-        clothes_combination_string += (cur_color + cur_type_of_clothes)
+        clothes_combination_string += (str(cur_color) + cur_type_of_clothes)
         up.setRating(preference, clothes_combination_string)  
         return redirect(url_for('home'))
 
@@ -299,7 +299,8 @@ def take():
             else:
                 final_clothes += [c]
         r, g, b = request.form.get("red"), request.form.get("green"), request.form.get("blue")
-        final_color += [r, g, b]
+        cur_color = (r, g, b)
+        final_color = [r,g,b]
         return redirect(url_for('show_take'))
     else:   
         print("going to take.html")
