@@ -1,5 +1,7 @@
-# this angle will be from 0 to 180, incremented by 9 
+from diskcache import Cache
 
+# this angle will be from 0 to 180, incremented by 9 
+storage = Cache("storage")
 class clothes:
     def __init__(self, angle, type_of_clothes, color, preference, clothing_type):
         self.angle = angle
@@ -11,6 +13,9 @@ class clothes:
 def init_database(database):
     for i in range(20):
         database.append(clothes(-1, "tshirt", "red", 0, -1))
+    for i in range(20):
+        if storage.get(str(i)) != None:
+            database[i] = storage.get(str(i))
     return
 
 def print_database(database):
@@ -80,6 +85,7 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
     database[i].color = color 
     database[i].preference = preference
     database[i].clothing_type = clothing_type
+    storage[str(i)] = database[i]
     return
 
 def find_clothes_index(database, type_of_clothes, color):
