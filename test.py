@@ -113,7 +113,9 @@ def ret():
 @app.route("/take", methods=["POST", "GET"])
 def take():
     if request.method == "POST":
-        clothes = request.form["clothes"]
+        clothes = request.form.get("type_of_clothes")
+        print("clothes is")
+        print(clothes)
         cl = clothes.split("clothes=")
         final_clothes = []
         for c in cl:
@@ -121,12 +123,55 @@ def take():
                 final_clothes += [c[:-1]]
             else:
                 final_clothes += [c]
-        r, g, b = request.form("red"), request.form("green"), request.form("blue")
-        final_color += [r, g, b]
+        r, g, b = request.form.get("red"), request.form.get("green"), request.form.get("blue")
+        final_color = [r, g, b]
         return redirect(url_for('show_take'))
     else:   
         print("going to take.html")
         return render_template("take.html", class_lookup = class_lookup)
+
+@app.route("/show_take", methods=["POST", "GET"])
+def show_take():
+    if request.method == "POST":
+        # cur_type_of_clothes, cur_color = get_from_picture()
+        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        if i != -1:
+            # sc.rotate_servo(cur_angle, i * 9)
+            return redirect(url_for('update_take'))
+        else:
+            print ("couldn't find the clothes for some reason")
+            return redirect(url_for('home'))
+        
+    else:
+        # convert [R, G, B] into nearest color
+        nearest_color = webs.get_colour_name(final_color)
+        # Call the matching API
+        clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
+        # Call the preference API using the clothes_to_take
+        combinations = matching.getMatches(database, clothes_to_take)
+
+        # combinations here will be a set of strings that will look like
+        #("blueshirtredpants", "whitejacketbluejeans")
+
+        # call the visualizerAPI using combinations
+        # using these clothes combinations, we will get the corresponding image
+        for clothes_img in combinations:
+            # outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
+            outfitImages = ""
+        return render_template("show_take.html", imgs = outfitImages)
+
+@app.route("/update_take", methods=["POST", "GET"])
+def update_take():
+    if request.method == "POST":
+        # here I will update the database
+        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        db.remove_from_database(database, i)
+        cur_angle = i * 9
+        return redirect(url_for('home'))
+
+    else:
+        print("going to update_take.html")
+        return render_template("update_take.html")
 
 if __name__ == "__main__":
     print("starting smartwardrobe")

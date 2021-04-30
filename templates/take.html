@@ -4,9 +4,9 @@
 <h1>Let's Take some clothes</h1>
     <p>Select the type of clothes, and the rgb</p>
 
-    <form>
+    <form method = "post">
     {% for n in class_lookup %}
-        <input type="checkbox" name= "clothes">
+        <input type="checkbox" value = {{n}} name= "type_of_clothes">
         <label for={{ n }}>{{ n }}</label>
     {% endfor %}
         <br />
