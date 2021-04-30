@@ -144,6 +144,9 @@ def update_add():
 # for remove clothes, I want to display database
 @app.route("/remove", methods=["POST", "GET"])
 def remove():
+    global cur_type_of_clothes
+    global cur_color
+
     if request.method == "POST":
         # Here the user will decide what clothes they would like to remove
         temp = request.form.getlist("remove")
@@ -163,6 +166,8 @@ def remove():
 
 @app.route("/update_remove", methods=["POST", "GET"])
 def update_remove():
+    global database
+    global cur_angle
     if request.method == "POST":
         # here I will update the database
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
@@ -178,6 +183,9 @@ def update_remove():
 # 1 additional page, which will require user feedback of clothes
 @app.route("/ret", methods=["POST", "GET"])
 def ret():
+    global cur_type_of_clothes
+    global cur_color
+
     if request.method == "POST":
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
@@ -196,6 +204,9 @@ def ret():
 
 @app.route("/update_ret", methods=["POST", "GET"])
 def update_ret():
+    global database
+    global cur_angle
+
     if request.method == "POST":
         # here I will update the database
         preference = request.form["nm"]
@@ -227,6 +238,9 @@ def update_ret():
 # and asking for the preference
 @app.route("/ret2", methods=["POST", "GET"])
 def ret2():
+    global cur_type_of_clothes
+    global cur_color
+
     if request.method == "POST":
         img_file = request.form["img"]
         # This is where we get the color and type_of_clothes
@@ -245,6 +259,9 @@ def ret2():
 
 @app.route("/update_ret2", methods=["POST", "GET"])
 def update_ret2():
+    global database
+    global cur_angle
+
     if request.method == "POST":
         # here I will update the database
         preference_for_combination = request.form["nm"]
@@ -272,8 +289,7 @@ def take():
     global final_color
     global final_clothes
     if request.method == "POST":
-        clothes = request.form["clothes"]
-        print(clothes)
+        clothes = request.form.get("type_of_clothes")
         cl = clothes.split("clothes=")
         final_clothes = []
         for c in cl:
@@ -291,6 +307,9 @@ def take():
 
 @app.route("/show_take", methods=["POST", "GET"])
 def show_take():
+    global cur_type_of_clothes
+    global cur_color
+
     if request.method == "POST":
         # cur_type_of_clothes, cur_color = get_from_picture()
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
@@ -323,6 +342,8 @@ def show_take():
 
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():
+    global database
+    global cur_angle
     if request.method == "POST":
         # here I will update the database
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
