@@ -337,6 +337,7 @@ def show_take():
         # using these clothes combinations, we will get the corresponding image
         outfitImages = []
         for clothes_img in combinations:
+            print(clothes_img)
             outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color, 5)]
         return render_template("show_take.html", imgs = outfitImages)
 
