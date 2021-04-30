@@ -144,3 +144,13 @@ def colorError(c1, c2):
     if error < 0 or error > 1:
         print(1/0)
     return error
+
+def convert_string_to_set(i):
+    final = ()
+    "(1,2,3)"
+    temp1 = i[1:-1]
+    "1,2,3"
+    temp2 = temp.split(,)
+    for elem in temp2:
+        final.add(elem)
+    return final

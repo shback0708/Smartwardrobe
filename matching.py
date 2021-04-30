@@ -28,69 +28,69 @@ def setFilter(category, color, database):
 # output of getMatches will be all the images displayed to the user
 # final will look like [[]]
 def getMatches(database, output_of_setFilter):
-    good_rating = set()
-    no_rating = set()
-    bad_rating = set()
+    final = []
+    good_rating = []
+    no_rating = []
+    bad_rating = []
     for c in output_of_setFilter:
+        temp = ()
         color, type_of_clothes = c.split(",")
+        # color will be "(0,0,0)" and type of clothes will be "tshirt"
         clothing_type = getClothingType(type_of_clothes)
+        temp_set = db.convert_string_to_set(color)
         # this means it's a top
         # we need to add suggestions for the bottom
         if clothing_type == 0:
+            temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
             # finish it up by adding top and bottom combo to the temp
             for clothes in database:
                 if clothes.clothing_type == 1:
-                    temp = color + type_of_clothes
-                    temp += clothes.color
-                    temp += clothes.type_of_clothes
-                    rating = up.getRating(temp)
+                    temp_string = color + type_of_clothes
+                    temp_string += clothes.color
+                    temp_string += clothes.type_of_clothes
+                    rating = up.getRating(temp_string)
+                    temp.append((clothes.type_of_clothes, "a", "b", "c", "d", clothes.color))
                     if rating == -1:
-                        bad_rating.add(temp)
+                        bad_rating.append(temp)
                     elif rating == 0:
-                        no_rating.add(temp)
+                        no_rating.append(temp)
                     elif rating == 1:
-                        good_rating.add(temp)
+                        good_rating.append(temp)
 
         # bottom
         elif clothing_type == 1:
             # finish it up by adding top and bottom combo to the temp
             for clothes in database:
                 if clothes.clothing_type == 0:      
-                    temp = clothes.color
-                    temp += clothes.type_of_clothes
-                    temp += (color + type_of_clothes)
-                    rating = up.getRating(temp)
+                    temp_string = clothes.color
+                    temp_string += clothes.type_of_clothes
+                    temp_string += (color + type_of_clothes)
+                    rating = up.getRating(temp_string)
+                    temp.append((clothes.type_of_clothes, "a", "b", "c", "d", clothes.color))
+                    temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
                     if rating == -1:
-                        bad_rating.add(temp)
+                        bad_rating.append(temp)
                     elif rating == 0:
-                        no_rating.add(temp)
+                        no_rating.append(temp)
                     elif rating == 1:
-                        good_rating.add(temp)
+                        good_rating.append(temp)
 
 
         # This means it's one piece, check preference immediately    
         elif clothing_type == 2:
             temp = color + type_of_clothes
             rating = up.getRating(temp)
+            temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
             if rating == -1:
-                bad_rating.add(temp)
+                bad_rating.append(temp)
             elif rating == 0:
-                no_rating.add(temp)
+                no_rating.append(temp)
             elif rating == 1:
-                good_rating.add(temp)
+                good_rating.append(temp)
         else:
             print("there's something wrong here")
     
-    good_rating.update(no_rating)
-    good_rating.update(bad_rating)
-    return good_rating
-
-
-
-    # use output_of_setFilter to find every single clothing combination
-
-    # make sure to call getFilter to organize the combination
-
+    final = good_rating + no_rating + bad_rating
     return final
 
 

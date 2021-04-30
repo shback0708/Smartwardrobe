@@ -333,15 +333,17 @@ def show_take():
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
 
-        # combinations here will be a set of strings that will look like
-        #("blueshirtredpants", "whitejacketbluejeans")
+        # combinations here will be a set of strings that will look like this
+
+        #[(("Tee", "Tee", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (255,255,255))), 
+        # (("Tee", "Tee", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (255,255,255)))]
 
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
         outfitImages = []
         for clothes_img in combinations:
             print(clothes_img)
-            outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color, 5)]
+            outfitImages += [vapi.getOutfitImgs(clothes_img[0], clothes_img[1], 5)]
         return render_template("show_take.html", imgs = outfitImages)
 
 @app.route("/update_take", methods=["POST", "GET"])
