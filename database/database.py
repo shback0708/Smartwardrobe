@@ -134,6 +134,7 @@ def remove_from_database(database, index):
     database[index].color = "empty..."
     database[index].preference = 0
     database[index].clothing_type = -1
+    storage[str(index)] = database[index]
     return
 
 def colorError(c1, c2):
