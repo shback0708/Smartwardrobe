@@ -152,7 +152,8 @@ def remove():
     if request.method == "POST":
         # Here the user will decide what clothes they would like to remove
         temp = request.form.getlist("remove")
-        cur_color, cur_type_of_clothes = temp[0].split(" ")
+        tokens = temp[0].split(" ")
+        cur_color, cur_type_of_clothes = tokens[0], tokens[1]
         print(cur_color, cur_type_of_clothes)
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
         if i != -1:
@@ -324,26 +325,19 @@ def show_take():
             return redirect(url_for('home'))
         
     else:
-        # convert [R, G, B] into nearest color
-        nearest_color = webs.get_colour_name(final_color)
         # Call the matching API
-        print(final_clothes, nearest_color)
-        clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
+        print(final_clothes, final_color)
+        clothes_to_take = matching.setFilter(final_clothes, final_color, database)
         print("clothes to take: ", clothes_to_take)
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
-
-        # combinations here will be a set of strings that will look like this
-
-        #[(("Tee", "Tee", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (255,255,255))), 
-        # (("Tee", "Tee", "a", "b", "c", (255,255,255)), ("Jeans", "Leggings", "a", "b", "c", (255,255,255)))]
 
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
         outfitImages = []
         for clothes_img in combinations:
             print(clothes_img)
-            outfitImages += [vapi.getOutfitImgs(clothes_img[0], clothes_img[1], 5)]
+            outfitImages += [vapi.getOutfitImgs(clothes_img, 5)]
         return render_template("show_take.html", imgs = outfitImages)
 
 @app.route("/update_take", methods=["POST", "GET"])
