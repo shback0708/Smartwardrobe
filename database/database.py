@@ -11,6 +11,7 @@ class clothes:
         self.color = color
         self.preference = 0
         self.clothing_type = -1
+        self.taken = True
 
 def init_database(database):
     for i in range(20):
@@ -88,6 +89,7 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
     database[i].color = color 
     database[i].preference = preference
     database[i].clothing_type = clothing_type
+    database[i].taken = False
     storage[str(i)] = database[i]
     return
 
@@ -134,8 +136,21 @@ def remove_from_database(database, index):
     database[index].color = "empty..."
     database[index].preference = 0
     database[index].clothing_type = -1
+    database[index].taken = True
     storage[str(index)] = database[index]
     return
+
+def take_from_database(database, index):
+    if(database[index].taken == False):
+        database[index].taken = True
+        storage[str(index)] = database[index]
+        return True
+    return False
+
+def return_to_database(database, index):
+    database[index].taken = False
+    storage[str(index)] = database[index]
+
 
 def colorError(c1, c2):
     print(c1,c2)
@@ -158,3 +173,16 @@ def convert_string_to_tuple(input):
     g = input[comma_index1 + 2:comma_index2]
     b = input[comma_index2 + 2 :-1]
     return (int(r),int(g),int(b))
+
+if __name__ == '__main__':
+    db = []
+    init_database(db)
+    add_to_database(db,0,"tee","red",0,1)
+    add_to_database(db,1,"tee","black",0,1)
+    print(db[1].taken)
+    take_from_database(db,1)
+    print(db[1].taken)
+    return_to_database(db,1)
+    print(db[1].taken)
+
+    #def add_to_database(database, i, type_of_clothes, color, preference, clothing_type):
