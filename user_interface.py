@@ -166,9 +166,13 @@ def remove():
     if request.method == "POST":
         # Here the user will decide what clothes they would like to remove
         temp = request.form.getlist("remove")
-        tokens = temp[0].split(" ")
-        cur_color, cur_type_of_clothes = tokens[0], tokens[1]
-        print(cur_color, cur_type_of_clothes)
+
+        split_index = temp[0].find(")")
+        cur_color_temp = temp[0][:split_index + 1]
+        cur_color = db.convert_string_to_tuple(cur_color_temp)
+        cur_type_of_clothes = temp[0][split_index + 2:]
+
+        print("cur type of clothes is" + cur_type_of_clothes)
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
         if i != -1:
             # sc.rotate_servo(cur_angle, i * 9)

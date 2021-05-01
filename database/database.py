@@ -130,8 +130,8 @@ def create_home_display(database):
 
 def remove_from_database(database, index):
     database[index].angle = -1
-    database[index].type_of_clothes = "removed"
-    database[index].color = (0,0,0)
+    database[index].type_of_clothes = "clothes is removed"
+    database[index].color = "empty..."
     database[index].preference = 0
     database[index].clothing_type = -1
     return
@@ -146,3 +146,14 @@ def colorError(c1, c2):
     if error < 0 or error > 1:
         print(1/0)
     return error
+
+def convert_string_to_tuple(input):
+    # "(0,0,0)"
+    temp = input[1:-1]
+    # now it will be from
+    comma_index1 = input.find(',')
+    comma_index2 = input.find(',', comma_index1 + 1)
+    r = input[1:comma_index1]
+    g = input[comma_index1 + 2:comma_index2]
+    b = input[comma_index2 + 2 :-1]
+    return (int(r),int(g),int(b))
