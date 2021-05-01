@@ -12,7 +12,7 @@
     
     <p>These are all the clothes that are in the Smart Wardrobe</p>
     {% for name in imgs %}
-        <img src = "{{url_for('static', filename = 'db_img/' + name )}}">
+        <img src = "{{name}}">
     {% endfor %}
 
     

@@ -124,7 +124,7 @@ def create_home_display(database):
     final = []
     for clothes in database:
         if clothes.angle != 1:
-            temp = str(clothes.color) + clothes.type_of_clothes + ".jpg"
+            temp = "static/db_img/" + str(clothes.color) + clothes.type_of_clothes + ".jpeg"
             final.append(temp)
     return final
 

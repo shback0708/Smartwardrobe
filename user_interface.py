@@ -90,9 +90,9 @@ def add():
         # cur_color = "red"
         
         # rename img_file
-        img_name = str(cur_color) + cur_type_of_clothes + ".jpg"
+        img_name = str(cur_color) + cur_type_of_clothes + ".jpeg"
         # save this image file in db_img
-        f.save(os.path.join("static/db_img", img_name))
+        image.save(os.path.join("static/db_img", img_name), format="JPEG")
         #f.save("static/db_img/" + img_name)
 
         return redirect(url_for('confirm_add'))
