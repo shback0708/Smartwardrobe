@@ -43,6 +43,9 @@ clothes_combination_string = ""
 clothes_option = []
 global_clothes_information = []
 
+next_type_of_clothes = ""
+next_color = ""
+
 @app.route("/")
 def index():
     return redirect(url_for('home'))
@@ -315,6 +318,8 @@ def show_take():
     global cur_type_of_clothes
     global cur_color
     global global_clothes_information
+    global next_type_of_clothes
+    global next_color
 
     if request.method == "POST":
         temp = request.form.get("mycheckbox")
@@ -331,7 +336,12 @@ def show_take():
         if len(temp_combination) == 2:
             # we will be taking 2 clothes
             cur_type_of_clothes = temp_combination[0][0]
+
             cur_color = temp_combination[0][5]
+
+            next_type_of_clothes = temp_combination[1][0]
+            next_color = temp_combination[1][5]
+
             i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
             if i != -1:
                 # sc.rotate_servo(cur_angle, i * 9)
@@ -347,7 +357,7 @@ def show_take():
             i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
             if i != -1:
                 # sc.rotate_servo(cur_angle, i * 9)
-                return redirect(url_for('update_take'))
+                return redirect(url_for('update_take2'))
             else:
                 print ("couldn't find the clothes for some reason")
                 return redirect(url_for('home'))
@@ -381,6 +391,26 @@ def show_take():
 def update_take():
     global database
     global cur_angle
+    global cur_type_of_clothes
+    global cur_color
+    if request.method == "POST":
+        # here I will update the database
+        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        db.remove_from_database(database, i)
+        cur_angle = i * 9
+        cur_type_of_clothes = next_type_of_clothes
+        cur_color = next_color
+        
+        return redirect(url_for('update_take2'))
+
+    else:
+        print("going to update_take.html")
+        return render_template("update_take.html")
+
+@app.route("/update_take2", methods=["POST", "GET"])
+def update_take2():
+    global database
+    global cur_angle
     if request.method == "POST":
         # here I will update the database
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
@@ -389,8 +419,8 @@ def update_take():
         return redirect(url_for('home'))
 
     else:
-        print("going to update_take.html")
-        return render_template("update_take.html")
+        print("going to update_take2.html")
+        return render_template("update_take2.html")
 
 if __name__ == "__main__":
     print("starting smartwardrobe")
