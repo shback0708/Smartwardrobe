@@ -63,7 +63,8 @@ def home():
         print("going to home.html")
         # need to make the array of inside_db_img
         imgs = db.create_home_display(database)
-        #imgs = ["redtshirt.jpg", "bluejeen.jpg"]
+        #imgs = ["(0, 0, 0)Tee.jpeg", "(255, 0, 0)Jeans.jpeg"]
+        print("imgs is " + str(imgs))
         return render_template("home.html", imgs = imgs)
 
 @app.route("/add", methods=["POST", "GET"])
@@ -74,6 +75,8 @@ def add():
 
     if request.method == "POST":
         f = request.files["img"]
+        print(f)
+        # f.save("static/db_img", f)
 
         image = Image.open(f).convert("RGB")
         temp_label, _, temp_color = cc.getAttributes(image)
@@ -90,6 +93,7 @@ def add():
         img_name = str(cur_color) + cur_type_of_clothes + ".jpg"
         # save this image file in db_img
         f.save(os.path.join("static/db_img", img_name))
+        #f.save("static/db_img/" + img_name)
 
         return redirect(url_for('confirm_add'))
 
