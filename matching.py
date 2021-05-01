@@ -48,12 +48,18 @@ def getMatches(database, clothes):
     for top in tops:
         for bottom in bottoms:
             # TODO: preference integration
-            outfits.append((top, bottom))
+
+            #remove dupes
+            if (top, bottom) not in outfits:
+                outfits.append((top, bottom))
 
     # just one-piece combinations
     for onePiece in onePieces:
         # TODO: preference integration
-        outfits.append((onePiece))
+
+        #remove dupes
+        if (onePiece) not in outfits:
+            outfits.append((onePiece)) 
 
     return outfits
 

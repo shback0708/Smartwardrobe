@@ -335,10 +335,16 @@ def show_take():
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
         outfitImages = []
-        for clothes_img in combinations:
-            print(clothes_img)
-            outfitImages += [vapi.getOutfitImgs(clothes_img, 5)]
-        return render_template("show_take.html", imgs = outfitImages)
+        filenames = []
+        for combination in combinations:
+            print(combination)
+            outfitImages += vapi.getOutfitImgs(combination, 5)
+        
+        for (index,image) in enumerate(outfitImages):
+            filename = "static/db_img/" + str(index) + ".jpeg"
+            image.save(filename, format="JPEG")
+            filenames.append(filename)
+        return render_template("show_take.html", imgs = filenames)
 
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():

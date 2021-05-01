@@ -1,5 +1,6 @@
 from diskcache import Cache
 
+colorThreshold = 0.3
 # this angle will be from 0 to 180, incremented by 9 
 storage = Cache("storage")
 class clothes:
@@ -13,7 +14,7 @@ class clothes:
 
 def init_database(database):
     for i in range(20):
-        database.append(clothes(-1, "tshirt", (0,0,0), 0, -1))
+        database.append(clothes(i, "Tee", (0,0,0), 10, 0))
 
     for i in range(20):
         if storage.get(str(i)) != None:
@@ -92,7 +93,7 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
 
 def find_clothes_index(database, type_of_clothes, color):
     for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= 5)):
+        if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= colorThreshold)):
             return i
         else:
             return -1
@@ -100,7 +101,7 @@ def find_clothes_index(database, type_of_clothes, color):
 def match_type_or_color(database, type_of_clothes, color):
     final = []
     for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) or (colorError(database[i].color, color) <= 5)):
+        if ((database[i].type_of_clothes == type_of_clothes) or (colorError(database[i].color, color) <= colorThreshold)):
             final.append(database[i])
     return final
 
@@ -114,7 +115,7 @@ def match_type(database, type_of_clothes):
 def match_color(database, color):
     final = []
     for i in range(len(database)):   
-        if ((colorError(database[i].color, color) <= 5)):
+        if ((colorError(database[i].color, color) <= colorThreshold)):
             final.append(database[i])
     return final
 
@@ -144,13 +145,3 @@ def colorError(c1, c2):
     if error < 0 or error > 1:
         print(1/0)
     return error
-
-def convert_string_to_set(i):
-    final = ()
-    "(1,2,3)"
-    temp1 = i[1:-1]
-    "1,2,3"
-    temp2 = temp.split(,)
-    for elem in temp2:
-        final.add(elem)
-    return final
