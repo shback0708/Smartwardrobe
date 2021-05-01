@@ -14,8 +14,8 @@ import matching as matching
 import time
 # import serial
 from PIL import Image
-import visualizer.webscraper as ws
-import visualizer.visualizer as vi
+# import visualizer.visualizer as vi
+import fakeapi as vi
 import user_preference.user_preference as up
 
 app = Flask(__name__)
@@ -322,18 +322,16 @@ def show_take():
         temp_index = int(temp[:parse_index])
         print(temp_index)
 
-        # I expect global_clothes information to look like this
-        # global_clothes_information = [(("Tee", (0, 0, 0)), ("jeans", (255, 255, 255))), ("onepiece", (0, 255, 255))]
         temp_combination = global_clothes_information[temp_index]
-
+        print(temp_combination)
         # now temp combination will contain the information about the clothes combination
         # we expect temp combination to be in this form
-        # (("Tee", (0, 0, 0)), ("jeans", (255, 255, 255)))
+        # (("Tee", "Tee", "Tee", "Tee", "Tee",(0, 0, 0)), ("jeans", "jeans", "jeans", "jeans", "jeans", (255, 255, 255)))
 
         if len(temp_combination) == 2:
             # we will be taking 2 clothes
             cur_type_of_clothes = temp_combination[0][0]
-            cur_color = temp_combination[0][1]
+            cur_color = temp_combination[0][5]
             i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
             if i != -1:
                 # sc.rotate_servo(cur_angle, i * 9)
@@ -344,8 +342,8 @@ def show_take():
         
         else:
             # it will be a one piece clothing
-            cur_type_of_clothes = temp_combination[0]
-            cur_color = temp_combination[1]
+            cur_type_of_clothes = temp_combination[0][0]
+            cur_color = temp_combination[0][5]
             i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
             if i != -1:
                 # sc.rotate_servo(cur_angle, i * 9)
@@ -362,15 +360,16 @@ def show_take():
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
 
-        global_clothes_information = combinations
+        global_clothes_information = []
 
         # call the visualizerAPI using combinations
-        # using these clothes combinations, we will get the corresponding image
+        # using these clothes combinations, we will get the corresponding images
         outfitImages = []
         filenames = []
         for combination in combinations:
             print(combination)
             outfitImages += vapi.getOutfitImgs(combination, 5)
+            global_clothes_information += [combination for i in range(5)]
         
         for (index,image) in enumerate(outfitImages):
             filename = "static/take_img/" + str(index) + ".jpeg"
@@ -400,7 +399,5 @@ if __name__ == "__main__":
     cur_angle = 0
     vapi = vi.VisualizerAPI()
     cc = vapi.clothingRecModel.classifier
-    webs = ws.WebScraper()
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)
-    
