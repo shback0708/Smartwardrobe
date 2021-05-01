@@ -34,10 +34,14 @@ cur_angle = 0
 cur_type_of_clothes = ""
 cur_color = ""
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
-cc = ""
-vapi = ""
+
 final_clothes = []
 final_color = []
+
+db.init_database(database)
+db.print_database(database)
+vapi = vi.VisualizerAPI()
+cc = vapi.clothingRecModel.classifier
 
 clothes_combination_string = ""
 clothes_option = []
@@ -423,11 +427,5 @@ def update_take2():
         return render_template("update_take2.html")
 
 if __name__ == "__main__":
-    print("starting smartwardrobe")
-    db.init_database(database)
-    db.print_database(database)
-    cur_angle = 0
-    vapi = vi.VisualizerAPI()
-    cc = vapi.clothingRecModel.classifier
     #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)
