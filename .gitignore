@@ -10,8 +10,5 @@ clothing_Recognition/detector/train/*
 *.pyc
 training/*
 visualizer/imagestorage/*
-imagestorage/*
-storage/*
 *.pyc
 *.pyc
-

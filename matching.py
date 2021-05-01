@@ -12,50 +12,87 @@ import time
 # This function will call the database and return all the combinations
 
 def setFilter(category, color, database):
-    final = []
+    final = set()
     t = db.match_color(database, color)
     if(t != []):
-        final.append((t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].color))
+        final.add(t[0].color + "," + t[0].type_of_clothes)
     for i in category:
         clothes = db.match_type(database, i)
         print("clothes: ", clothes)
         for cloth in clothes:
-            final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
+            final.add(cloth.color + "," + cloth.type_of_clothes)
     return final
 
 # returns images of the best outfits 
 # output_of_setFilter will be a 2D array
 # output of getMatches will be all the images displayed to the user
 # final will look like [[]]
-def getMatches(database, clothes):
+def getMatches(database, output_of_setFilter):
+    final = []
+    good_rating = []
+    no_rating = []
+    bad_rating = []
+    for c in output_of_setFilter:
+        temp = ()
+        color, type_of_clothes = c.split(",")
+        # color will be "(0,0,0)" and type of clothes will be "tshirt"
+        clothing_type = getClothingType(type_of_clothes)
+        temp_set = db.convert_string_to_set(color)
+        # this means it's a top
+        # we need to add suggestions for the bottom
+        if clothing_type == 0:
+            temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
+            # finish it up by adding top and bottom combo to the temp
+            for clothes in database:
+                if clothes.clothing_type == 1:
+                    temp_string = color + type_of_clothes
+                    temp_string += clothes.color
+                    temp_string += clothes.type_of_clothes
+                    rating = up.getRating(temp_string)
+                    temp.append((clothes.type_of_clothes, "a", "b", "c", "d", clothes.color))
+                    if rating == -1:
+                        bad_rating.append(temp)
+                    elif rating == 0:
+                        no_rating.append(temp)
+                    elif rating == 1:
+                        good_rating.append(temp)
 
-    # seperate clothes in categories
-    tops = []
-    bottoms = []
-    onePieces = []
-    # clothing is ((0,0,0), "Tee")
-    for clothing in clothes:
-        category = getClothingType(clothing[1])
-        if category == 0: # top
-            tops.append(clothing)
-        elif category == 1: # bottom
-            bottoms.append(clothing)
+        # bottom
+        elif clothing_type == 1:
+            # finish it up by adding top and bottom combo to the temp
+            for clothes in database:
+                if clothes.clothing_type == 0:      
+                    temp_string = clothes.color
+                    temp_string += clothes.type_of_clothes
+                    temp_string += (color + type_of_clothes)
+                    rating = up.getRating(temp_string)
+                    temp.append((clothes.type_of_clothes, "a", "b", "c", "d", clothes.color))
+                    temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
+                    if rating == -1:
+                        bad_rating.append(temp)
+                    elif rating == 0:
+                        no_rating.append(temp)
+                    elif rating == 1:
+                        good_rating.append(temp)
+
+
+        # This means it's one piece, check preference immediately    
+        elif clothing_type == 2:
+            temp = color + type_of_clothes
+            rating = up.getRating(temp)
+            temp.append((type_of_clothes, "a", "b", "c", "d", temp_set))
+            if rating == -1:
+                bad_rating.append(temp)
+            elif rating == 0:
+                no_rating.append(temp)
+            elif rating == 1:
+                good_rating.append(temp)
         else:
-            onePieces.append(clothing)
+            print("there's something wrong here")
     
-    outfits = []
-    # find top and bottom combinations
-    for top in tops:
-        for bottom in bottoms:
-            # TODO: preference integration
-            outfits.append((top, bottom))
+    final = good_rating + no_rating + bad_rating
+    return final
 
-    # just one-piece combinations
-    for onePiece in onePieces:
-        # TODO: preference integration
-        outfits.append((onePiece))
-
-    return outfits
 
 #returns type of clothing
 #0 for tops, 1 for bottoms, 2 for onepieces
