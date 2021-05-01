@@ -24,6 +24,8 @@ View('Take', 'take')
 database = []
 clothes_option = []
 
+global_clothes_information = []
+
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
 
 @app.route("/")
@@ -134,7 +136,14 @@ def take():
 def show_take():
     if request.method == "POST":
         # cur_type_of_clothes, cur_color = get_from_picture()
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        temp = request.form.get('mycheckbox')
+        parse_index = temp.find(".")
+        temp_index = temp[:parse_index]
+        print(temp_index)
+        temp_string = "(0, 0, 0)tshirt.jpg"
+        
+        #i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        i = 0
         if i != -1:
             # sc.rotate_servo(cur_angle, i * 9)
             return redirect(url_for('update_take'))
@@ -144,21 +153,25 @@ def show_take():
         
     else:
         # convert [R, G, B] into nearest color
-        nearest_color = webs.get_colour_name(final_color)
+        #nearest_color = webs.get_colour_name(final_color)
         # Call the matching API
-        clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
+        #clothes_to_take = matching.setFilter(final_clothes, nearest_color, database)
         # Call the preference API using the clothes_to_take
-        combinations = matching.getMatches(database, clothes_to_take)
+        #combinations = matching.getMatches(database, clothes_to_take)
 
         # combinations here will be a set of strings that will look like
         #("blueshirtredpants", "whitejacketbluejeans")
 
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
-        for clothes_img in combinations:
-            # outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
-            outfitImages = ""
-        return render_template("show_take.html", imgs = outfitImages)
+        # for clothes_img in combinations:
+        #     # outfitImages += [vapi.getOutfitImgs(clothes_img.type_of_clothes, clothes_img.color)].save("test" + )
+        #     outfitImages = ""
+
+        global_clothes_information = [(("Tee", "blue"), ("jeans", "red")), ("onepiece", "green")]
+
+        filenames = ["0.jpg", "1.jpg"]
+        return render_template("show_take.html", imgs = filenames)
 
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():

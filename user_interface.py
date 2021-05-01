@@ -41,6 +41,7 @@ final_color = []
 
 clothes_combination_string = ""
 clothes_option = []
+global_clothes_information = []
 
 @app.route("/")
 def index():
@@ -313,16 +314,45 @@ def take():
 def show_take():
     global cur_type_of_clothes
     global cur_color
+    global global_clothes_information
 
     if request.method == "POST":
-        # cur_type_of_clothes, cur_color = get_from_picture()
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        if i != -1:
-            # sc.rotate_servo(cur_angle, i * 9)
-            return redirect(url_for('update_take'))
+        temp = request.form.get("mycheckbox")
+        parse_index = temp.find(".")
+        temp_index = int(temp[:parse_index])
+        print(temp_index)
+
+        # I expect global_clothes information to look like this
+        # global_clothes_information = [(("Tee", (0, 0, 0)), ("jeans", (255, 255, 255))), ("onepiece", (0, 255, 255))]
+        temp_combination = global_clothes_information[temp_index]
+
+        # now temp combination will contain the information about the clothes combination
+        # we expect temp combination to be in this form
+        # (("Tee", (0, 0, 0)), ("jeans", (255, 255, 255)))
+
+        if len(temp_combination) == 2:
+            # we will be taking 2 clothes
+            cur_type_of_clothes = temp_combination[0][0]
+            cur_color = temp_combination[0][1]
+            i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+            if i != -1:
+                # sc.rotate_servo(cur_angle, i * 9)
+                return redirect(url_for('update_take'))
+            else:
+                print ("couldn't find the clothes for some reason")
+                return redirect(url_for('home'))
+        
         else:
-            print ("couldn't find the clothes for some reason")
-            return redirect(url_for('home'))
+            # it will be a one piece clothing
+            cur_type_of_clothes = temp_combination[0]
+            cur_color = temp_combination[1]
+            i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+            if i != -1:
+                # sc.rotate_servo(cur_angle, i * 9)
+                return redirect(url_for('update_take'))
+            else:
+                print ("couldn't find the clothes for some reason")
+                return redirect(url_for('home'))
         
     else:
         # Call the matching API
@@ -331,6 +361,8 @@ def show_take():
         print("clothes to take: ", clothes_to_take)
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
+
+        global_clothes_information = combinations
 
         # call the visualizerAPI using combinations
         # using these clothes combinations, we will get the corresponding image
@@ -341,9 +373,9 @@ def show_take():
             outfitImages += vapi.getOutfitImgs(combination, 5)
         
         for (index,image) in enumerate(outfitImages):
-            filename = "static/db_img/" + str(index) + ".jpeg"
+            filename = "static/take_img/" + str(index) + ".jpeg"
             image.save(filename, format="JPEG")
-            filenames.append(filename)
+            filenames.append(str(index) + ".jpeg")
         return render_template("show_take.html", imgs = filenames)
 
 @app.route("/update_take", methods=["POST", "GET"])
