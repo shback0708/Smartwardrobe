@@ -9,7 +9,7 @@ class Classifier:
         print("")
 
     def getAttributes(self,image):
-        return (("Tee", "Tee", "Tee", "Tee", "Tee"), 1, (0,0,0))
+        return (("Tee", "Coat", "Tee", "Tee", "Tee"), 1, (0,0,0))
 
 class ClothingRecModel:
     classifier = Classifier()

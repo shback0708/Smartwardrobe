@@ -64,7 +64,6 @@ def home():
         # need to make the array of inside_db_img
         imgs = db.create_home_display(database)
         #imgs = ["(0, 0, 0)Tee.jpeg", "(255, 0, 0)Jeans.jpeg"]
-        print("imgs is " + str(imgs))
         return render_template("home.html", imgs = imgs)
 
 @app.route("/add", methods=["POST", "GET"])
@@ -109,17 +108,20 @@ def confirm_add():
         
         # first we check if clothes option is correct
         temp = request.form.getlist("correct")
+
+        print("cur_type_of_clothes is " + cur_type_of_clothes)
+        print("temp[0] which should be jacket is " + temp[0])
         
         if cur_type_of_clothes != temp[0]:
             print("image processing not successful")
             # the image procesing was not successful
             # we have to rename using os
-            old_img_dir = "static/db_img/" + str(cur_color) + cur_type_of_clothes + ".jpg"
-            new_img_dir = "static/db_img/" + str(cur_color) + temp[0] + ".jpg"
+            old_img_dir = "static/db_img/" + str(cur_color) + cur_type_of_clothes + ".jpeg"
+            new_img_dir = "static/db_img/" + str(cur_color) + temp[0] + ".jpeg"
             os.rename(old_img_dir, new_img_dir)
 
             # now we will have to redefine cur_type_of_clothes to temp
-            cur_type_of_clothes = temp
+            cur_type_of_clothes = temp[0]
 
         # we don't add clothes to the database here yet
         i = db.find_index_to_add(database)
