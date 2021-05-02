@@ -14,8 +14,8 @@ import matching as matching
 import time
 # import serial
 from PIL import Image
-# import visualizer.visualizer as vi
-import fakeapi as vi
+import visualizer.visualizer as vi
+# import fakeapi as vi
 import user_preference.user_preference as up
 
 app = Flask(__name__)
@@ -385,9 +385,6 @@ def show_take():
 
         # might need to use this one
         #temp = request.form.getlist("correct")
-
-        global_clothes_information = [(("Tee", "Tee", "Tee", "Tee", "Tee", (0, 0, 255)), ("Jeans", "Jeans", "Jeans", "Jeans", "Jeans", (0, 0, 255))), (("Tee", "Tee", "Tee", "Tee", "Tee", (0, 0, 0)),)]
-
         temp_combination = global_clothes_information[temp_index]
         print(temp_combination)
         # now temp combination will contain the information about the clothes combination
@@ -446,11 +443,8 @@ def show_take():
         for (index,image) in enumerate(outfitImages):
             filename = "static/take_img/" + str(index) + ".jpeg"
             image.save(filename, format="JPEG")
-            filenames.append(str(index) + ".jpeg")
+            filenames.append(filename)
 
-        # This code exists just for te purpose of proving that take can display image
-        filenames = ["static/take_img/0.jpeg", "static/take_img/1.jpeg"]
-        print(filenames)
         return render_template("show_take.html", imgs = filenames)
 
 @app.route("/update_take", methods=["POST", "GET"])

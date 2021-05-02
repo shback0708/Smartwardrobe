@@ -71,14 +71,14 @@ def getMatches(database, clothes):
 
         #remove dupes
         if (onePiece) not in outfits:
-            outfits.append((onePiece))
+            outfits.append((onePiece,))
             rating = up.getRating((onePiece,))
             if rating == 1:
-                likes.append((onePiece))
+                likes.append((onePiece,))
             elif rating == 0:
-                neutral.append((onePiece))
+                neutral.append((onePiece,))
             else:
-                dislikes.append((onePiece))
+                dislikes.append((onePiece,))
     a = likes + neutral + dislikes
     return a
     #return outfits
