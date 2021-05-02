@@ -6,10 +6,13 @@
 
     <form method = "post">
         <label for="img">Select image:</label>
-        <p> </p>
         {% for image_file in imgs %}
-            <input type="checkbox" value = {{image_file}} name = 'mycheckbox'>
-            <image src = "{{ url_for('static', filename = 'take_img/' + image_file)}}">
+            {{image_file}}<input type="checkbox" value = {{image_file}} name = 'mycheckbox'>
+        {% endfor %}
+
+        {% for image_file in imgs %}
+            <p>{{image_file}}</p>
+            <image src = "{{image_file}}"></image>
         {% endfor %}
         <p><input type="submit" value = "done"></p>
     </form>

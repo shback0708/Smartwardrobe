@@ -68,6 +68,7 @@ def home():
         print("going to home.html")
         # need to make the array of inside_db_img
         imgs = db.create_home_display(database)
+        print(imgs)
         #imgs = ["(0, 0, 0)Tee.jpeg", "(255, 0, 0)Jeans.jpeg"]
         return render_template("home.html", imgs = imgs)
 
@@ -349,20 +350,12 @@ def update_ret2():
 # I will implement checkboxes
 @app.route("/take", methods=["POST", "GET"])
 def take():
-    global final_color
     global final_clothes
+    global cur_color
     if request.method == "POST":
-        clothes = request.form.get("type_of_clothes")
-        cl = clothes.split("clothes=")
-        final_clothes = []
-        for c in cl:
-            if c[-1] == '&':
-                final_clothes += [c[:-1]]
-            else:
-                final_clothes += [c]
+        final_clothes = request.form.getlist("type_of_clothes")
         r, g, b = request.form.get("red"), request.form.get("green"), request.form.get("blue")
         cur_color = (int(r), int(g), int(b))
-        final_color = [int(r), int(g), int(b)]
 
         return redirect(url_for('show_take'))
     else:   
@@ -378,10 +371,22 @@ def show_take():
     global next_color
 
     if request.method == "POST":
-        temp = request.form.get("mycheckbox")
-        parse_index = temp.find(".")
-        temp_index = int(temp[:parse_index])
+        temp_0 = request.form.getlist("mycheckbox")
+        print("temp_0 is")
+        print(temp_0)
+        temp = temp_0[0]
+        print("temp is")
+        print(temp)
+        parse_index_0 = temp.find("/")
+        parse_index_1 = temp.find("/", parse_index_0+1)
+        parse_index_2 = temp.find(".")
+        temp_index = int(temp[parse_index_1 + 1:parse_index_2])
         print(temp_index)
+
+        # might need to use this one
+        #temp = request.form.getlist("correct")
+
+        global_clothes_information = [(("Tee", "Tee", "Tee", "Tee", "Tee", (0, 0, 255)), ("Jeans", "Jeans", "Jeans", "Jeans", "Jeans", (0, 0, 255))), (("Tee", "Tee", "Tee", "Tee", "Tee", (0, 0, 0)),)]
 
         temp_combination = global_clothes_information[temp_index]
         print(temp_combination)
@@ -403,7 +408,7 @@ def show_take():
                 # sc.rotate_servo(cur_angle, i * 9)
                 return redirect(url_for('update_take'))
             else:
-                print ("couldn't find the clothes for some reason")
+                print ("couldn't find the clothes for 2 clothes (top) for some reason")
                 return redirect(url_for('home'))
         
         else:
@@ -415,13 +420,13 @@ def show_take():
                 # sc.rotate_servo(cur_angle, i * 9)
                 return redirect(url_for('update_take2'))
             else:
-                print ("couldn't find the clothes for some reason")
+                print ("couldn't find the clothes for one piece of clothing for some reason")
                 return redirect(url_for('home'))
         
     else:
         # Call the matching API
-        print(final_clothes, final_color)
-        clothes_to_take = matching.setFilter(final_clothes, final_color, database)
+        print(final_clothes, cur_color)
+        clothes_to_take = matching.setFilter(final_clothes, cur_color, database)
         print("clothes to take: ", clothes_to_take)
         # Call the preference API using the clothes_to_take
         combinations = matching.getMatches(database, clothes_to_take)
@@ -437,10 +442,15 @@ def show_take():
             outfitImages += vapi.getOutfitImgs(combination, 5)
             global_clothes_information += [combination for i in range(5)]
         
+        # Here  we will be saving the files into jpeg
         for (index,image) in enumerate(outfitImages):
             filename = "static/take_img/" + str(index) + ".jpeg"
             image.save(filename, format="JPEG")
             filenames.append(str(index) + ".jpeg")
+
+        # This code exists just for te purpose of proving that take can display image
+        filenames = ["static/take_img/0.jpeg", "static/take_img/1.jpeg"]
+        print(filenames)
         return render_template("show_take.html", imgs = filenames)
 
 @app.route("/update_take", methods=["POST", "GET"])
@@ -452,7 +462,7 @@ def update_take():
     if request.method == "POST":
         # here I will update the database
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        db.remove_from_database(database, i)
+        db.take_from_database(database, i)
         cur_angle = i * 9
         cur_type_of_clothes = next_type_of_clothes
         cur_color = next_color
@@ -470,7 +480,7 @@ def update_take2():
     if request.method == "POST":
         # here I will update the database
         i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        db.remove_from_database(database, i)
+        db.take_from_database(database, i)
         cur_angle = i * 9
         return redirect(url_for('home'))
 

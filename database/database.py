@@ -11,13 +11,14 @@ class clothes:
         self.color = color
         self.preference = 0
         self.clothing_type = -1
-        self.clothes_taken = True
+        self.clothes_taken = clothes_taken
 
 def init_database(database):
-    for i in range(18):
-        database.append(clothes(-1, "Tee", (0,0,0), 10, 0, True))
-    database.append(clothes(18, "Tee", (0,0,255), 10, 0, True))
-    database.append(clothes(19, "Jeans", (0,0,255), 10, 0, True))
+    for i in range(17):
+        database.append(clothes(-1, "", (0,0,0), 10, 0, True))
+    database.append(clothes(17, "Coat", (0,0,0), 10, 0, False))
+    database.append(clothes(18, "Tee", (0,0,255), 10, 0, False))
+    database.append(clothes(19, "Jeans", (0,0,255), 10, 0, False))
 
     for i in range(20):
         if storage.get(str(i)) != None:
@@ -98,7 +99,8 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
 def find_clothes_index(database, type_of_clothes, color):
     print(type_of_clothes, color)
     for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= colorThreshold)):
+        #if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= colorThreshold)):
+        if ((database[i].type_of_clothes == type_of_clothes) and (database[i].color == color)):
             return i
         else:
             return -1
@@ -127,7 +129,7 @@ def match_color(database, color):
 def create_home_display(database):
     final = []
     for clothes in database:
-        if clothes.angle != 1:
+        if (clothes.angle) != 1 and (clothes.clothes_taken == False):
             temp = "static/db_img/" + str(clothes.color) + clothes.type_of_clothes + ".jpeg"
             final.append(temp)
     return final
