@@ -15,7 +15,9 @@ def setFilter(category, color, database):
     final = []
     t = db.match_color(database, color)
     if(t != []):
-        final.append((t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].type_of_clothes, t[0].color))
+        for cloth in t:
+            if(cloth.type_of_clothes != ""):
+                final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
     for i in category:
         clothes = db.match_type(database, i)
         print("clothes: ", clothes)
@@ -112,5 +114,6 @@ if __name__ == '__main__':
 
 
     d = setFilter(("Coat","Jeans","Dress"),(0,0,0),database)
+    print(d)
     print(getMatches(database,d))
     #print(getMatches(database,(b,c)))

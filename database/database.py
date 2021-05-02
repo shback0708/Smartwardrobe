@@ -14,11 +14,8 @@ class clothes:
         self.clothes_taken = clothes_taken
 
 def init_database(database):
-    for i in range(17):
+    for i in range(20):
         database.append(clothes(-1, "", (0,0,0), 10, 0, True))
-    database.append(clothes(17, "Coat", (0,0,0), 10, 0, False))
-    database.append(clothes(18, "Tee", (0,0,255), 10, 0, False))
-    database.append(clothes(19, "Jeans", (0,0,255), 10, 0, False))
 
     for i in range(20):
         if storage.get(str(i)) != None:
