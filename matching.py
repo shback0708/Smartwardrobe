@@ -20,7 +20,8 @@ def setFilter(category, color, database):
         clothes = db.match_type(database, i)
         print("clothes: ", clothes)
         for cloth in clothes:
-            final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
+            if cloth.color != color:
+                final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
     return final
 
 # returns images of the best outfits 
@@ -42,8 +43,10 @@ def getMatches(database, clothes):
             bottoms.append(clothing)
         else:
             onePieces.append(clothing)
-    
     outfits = []
+    likes = []
+    neutral = []
+    dislikes = []
     # find top and bottom combinations
     for top in tops:
         for bottom in bottoms:
@@ -52,6 +55,13 @@ def getMatches(database, clothes):
             #remove dupes
             if (top, bottom) not in outfits:
                 outfits.append((top, bottom))
+                rating = up.getRating((top, bottom))
+                if rating == 1:
+                    likes.append((top,bottom))
+                elif rating == 0:
+                    neutral.append((top,bottom))
+                else:
+                    dislikes.append((top,bottom))
 
     # just one-piece combinations
     for onePiece in onePieces:
@@ -59,9 +69,17 @@ def getMatches(database, clothes):
 
         #remove dupes
         if (onePiece) not in outfits:
-            outfits.append((onePiece)) 
-
-    return outfits
+            outfits.append((onePiece))
+            rating = up.getRating((onePiece,))
+            if rating == 1:
+                likes.append((onePiece))
+            elif rating == 0:
+                neutral.append((onePiece))
+            else:
+                dislikes.append((onePiece))
+    a = likes + neutral + dislikes
+    return a
+    #return outfits
 
 #returns type of clothing
 #0 for tops, 1 for bottoms, 2 for onepieces
@@ -77,3 +95,22 @@ def getClothingType(category):
         return 2
     else:
         raise Exception("unknown clothing type: " + category)
+
+if __name__ == '__main__':
+    database = []
+    db.init_database(database)
+    db.add_to_database(database,0,"Coat",(0,0,0),0,0)
+    db.add_to_database(database,1,"Coat",(0,0,300),0,0)
+    db.add_to_database(database,2,"Jeans",(300,0,0),0,1)
+    db.add_to_database(database,3,"Dress",(0,300,0),0,2)
+
+    a = (("Coat","a","b","c","d",(0,0,0)), ("Jeans","a","b","c","d",(300,0,0)))
+    b = (("Dress","a","b","c","d",(0,300,0)),)
+
+    up.setRating(-1, a)
+    up.setRating(-1,b)
+
+
+    d = setFilter(("Coat","Jeans","Dress"),(0,0,0),database)
+    print(getMatches(database,d))
+    #print(getMatches(database,(b,c)))
