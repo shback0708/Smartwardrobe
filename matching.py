@@ -20,7 +20,7 @@ def setFilter(category, color, database):
         clothes = db.match_type(database, i)
         print("clothes: ", clothes)
         for cloth in clothes:
-            if cloth.color != color:
+            if cloth.color != color and cloth.clothing_type != -1 and cloth.clothes_taken != True:
                 final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
     return final
 
