@@ -58,8 +58,11 @@ def index():
 
 @app.route("/home", methods=["POST", "GET"])
 def home():
+    global clothes_taken_index_list
+    global one_clothes
     if request.method == "POST":
         type_of_action = request.form["nm"]
+        print(type_of_action)
         return redirect(url_for(type_of_action))
     else: # request is get
         print("going to home.html")
@@ -232,17 +235,28 @@ def ret():
     global clothes_taken_index_list
     global one_clothes
 
-    clothes_taken_index_list = db.find_clothes_taken(database)
-    if len(clothes_taken_index_list) == 2:
-        print("we're returning 2 pieces of clothing")
-        one_clothes = False
-        # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
-        return redirect(url_for('update_ret'))
-    elif len(clothes_taken_index_list) == 1:
-        print("we'll only be returning 1 pieces of clothing")
-        one_clothes = True
-        # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
-        return redirect(url_for('update_ret2'))
+    if request.method == "POST":
+
+        clothes_taken_index_list = db.find_clothes_taken(database)
+        print ("clothes_taken_index_list is ")
+        print (clothes_taken_index_list)
+        if len(clothes_taken_index_list) == 2:
+            print("we're returning 2 pieces of clothing")
+            one_clothes = False
+            # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
+            return redirect(url_for('update_ret'))
+        elif len(clothes_taken_index_list) == 1:
+            print("we'll only be returning 1 pieces of clothing")
+            one_clothes = True
+            # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
+            return redirect(url_for('update_ret2'))
+        else:
+            print("the wardrobe is full you can't return anything")
+            return redirect(url_for('home'))
+    
+    else:
+        print("going to ret.html")
+        return render_template("ret.html")
 
 
 @app.route("/update_ret", methods=["POST", "GET"])
@@ -259,7 +273,7 @@ def update_ret():
         db.return_to_database(database, i)
         cur_angle = i * 9
 
-        clothes_combination_tuple = ((toc, toc, toc, toc, toc, col))
+        clothes_combination_tuple = ((toc, toc, toc, toc, toc, col),)
 
         # we rotate the hanger again here
 
@@ -278,7 +292,7 @@ def update_ret2():
 
     if request.method == "POST":
         # get the preference for the user preference model
-        preference_for_combination = request.form["nm"]
+        preference = request.form["nm"]
         if int(preference) < 5:
             preference = "-1"
         else:
@@ -290,11 +304,13 @@ def update_ret2():
         db.return_to_database(database, i)
         cur_angle = i * 9
 
-        temp_tuple = ((toc, toc, toc, toc, toc, col))
+        temp_tuple = ((toc, toc, toc, toc, toc, col),)
         if one_clothes == True:
             up.setRating(preference, temp_tuple)  
         else:
+            # ("Tee", "Tee", )
             final_tuple = clothes_combination_tuple + temp_tuple
+            print(final_tuple)
             up.setRating(preference, final_tuple)  
 
         return redirect(url_for('home'))

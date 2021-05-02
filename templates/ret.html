@@ -2,12 +2,10 @@
 
 {% block body %}
 <h1>Let's return some clothes</h1>
-    <p>Choose the image of clothes you would like to return to your wardrobe</p>
+    <p>Press done when you are ready to return clothes to the wardrobe</p>
 
-    <form>
-        <label for="img">Select image:</label>
-        <input type="file" id="img" name="img" accept="image/*">
-        <input type="submit">
+    <form method = "post">
+        <p><input type="submit" value = "done"/></p>
     </form>
 
 {% endblock %}

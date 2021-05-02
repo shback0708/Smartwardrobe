@@ -4,7 +4,7 @@ colorThreshold = 0.3
 # this angle will be from 0 to 180, incremented by 9 
 storage = Cache("storage")
 class clothes:
-    def __init__(self, angle, type_of_clothes, color, preference, clothing_type, clothes_taken = True):
+    def __init__(self, angle, type_of_clothes, color, preference, clothing_type, clothes_taken = False):
         self.angle = angle
         self.type_of_clothes = type_of_clothes
         # color is now a tuple 
@@ -14,8 +14,10 @@ class clothes:
         self.clothes_taken = True
 
 def init_database(database):
-    for i in range(20):
-        database.append(clothes(i, "Tee", (0,0,0), 10, 0, True))
+    for i in range(18):
+        database.append(clothes(-1, "Tee", (0,0,0), 10, 0, True))
+    database.append(clothes(18, "Tee", (0,0,255), 10, 0, True))
+    database.append(clothes(19, "Jeans", (0,0,255), 10, 0, True))
 
     for i in range(20):
         if storage.get(str(i)) != None:
