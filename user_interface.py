@@ -466,6 +466,14 @@ def update_take():
         cur_angle = i * 9
         cur_type_of_clothes = next_type_of_clothes
         cur_color = next_color
+
+        j = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
+        if j != -1:
+            # sc.rotate_servo(cur_angle, j * 9)
+            return redirect(url_for('update_take2'))
+        else:
+            print ("couldn't find the clothes for the bottom clothing for some reason")
+            return redirect(url_for('home'))
         
         return redirect(url_for('update_take2'))
 

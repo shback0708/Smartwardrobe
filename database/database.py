@@ -98,12 +98,14 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
 
 def find_clothes_index(database, type_of_clothes, color):
     print(type_of_clothes, color)
+    print("type of clothes is :" + type_of_clothes)
+    print ("color is")
+    print(color)
     for i in range(len(database)):
         #if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= colorThreshold)):
         if ((database[i].type_of_clothes == type_of_clothes) and (database[i].color == color)):
             return i
-        else:
-            return -1
+    return -1
 
 def match_type_or_color(database, type_of_clothes, color):
     final = []
