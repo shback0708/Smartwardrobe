@@ -43,12 +43,14 @@ db.print_database(database)
 vapi = vi.VisualizerAPI()
 cc = vapi.clothingRecModel.classifier
 
-clothes_combination_string = ""
+clothes_combination_tuple = ()
 clothes_option = []
 global_clothes_information = []
 
 next_type_of_clothes = ""
 next_color = ""
+clothes_taken_index_list = []
+one_clothes = True
 
 @app.route("/")
 def index():
@@ -202,81 +204,72 @@ def update_remove():
 
 # This will be same as add except, we will redirect to 
 # 1 additional page, which will require user feedback of clothes
+# @app.route("/ret", methods=["POST", "GET"])
+# def ret():
+#     global cur_type_of_clothes
+#     global cur_color
+
+#     if request.method == "POST":
+#         img_file = request.files["img"]
+#         # This is where we get the color and type_of_clothes
+#         image = Image.open(img_file).convert("RGB")
+#         temp_label, _, temp_color = cc.getAttributes(image)
+#         cur_type_of_clothes = temp_label[0]
+#         cur_color = temp_color[0]
+#         # we don't add clothes to the database here yet
+#         i = db.find_index_to_add(database)
+#         # sc.rotate_servo(cur_angle, i * 9)
+#         return redirect(url_for('update_ret'))
+
+#     else: 
+#         print("going to ret.html")   
+#         return render_template("ret.html")
+
+# changed the entire return function so that we will be returning the clothes 
+# we took 
 @app.route("/ret", methods=["POST", "GET"])
 def ret():
-    global cur_type_of_clothes
-    global cur_color
+    global clothes_taken_index_list
+    global one_clothes
 
-    if request.method == "POST":
-        img_file = request.form["img"]
-        # This is where we get the color and type_of_clothes
-        image = Image.open(img_file).convert("RGB")
-        temp_label, _, temp_color = cc.getAttributes(image)
-        cur_type_of_clothes = temp_label[0]
-        cur_color = temp_color[0]
-        # we don't add clothes to the database here yet
-        i = db.find_index_to_add(database)
-        # sc.rotate_servo(cur_angle, i * 9)
+    clothes_taken_index_list = db.find_clothes_taken(database)
+    if len(clothes_taken_index_list) == 2:
+        print("we're returning 2 pieces of clothing")
+        one_clothes = False
+        # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
         return redirect(url_for('update_ret'))
+    elif len(clothes_taken_index_list) == 1:
+        print("we'll only be returning 1 pieces of clothing")
+        one_clothes = True
+        # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
+        return redirect(url_for('update_ret2'))
 
-    else: 
-        print("going to ret.html")   
-        return render_template("ret.html")
 
 @app.route("/update_ret", methods=["POST", "GET"])
 def update_ret():
     global database
     global cur_angle
+    global clothes_combination_tuple
 
     if request.method == "POST":
-        # here I will update the database
-        preference = request.form["nm"]
-        if int(preference) < 5:
-            preference = "-1"
-        else:
-            preference = "1"
 
-        i = db.find_index_to_add(database)
-        clothing_type = vapi.getClothingType(cur_type_of_clothes)
-        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
+        i = clothes_taken_index_list[0]
+        toc = database[i].type_of_clothes
+        col = database[i].color
+        db.return_to_database(database, i)
         cur_angle = i * 9
-        if clothing_type != 2:
-            clothes_combination_string = str(cur_color) + cur_type_of_clothes
-            return redirect(url_for('ret2'))
-        else:
-            # Here we will update the combination
-            clothes_combination_string = (str(cur_color) + cur_type_of_clothes)
-            up.setRating(preference, clothes_combination_string)
-            return redirect(url_for('home'))
+
+        clothes_combination_tuple = ((toc, toc, toc, toc, toc, col))
+
+        # we rotate the hanger again here
+
+        # sc.rotate_servo(cur_angle, clothes_taken_index_list[1])
+
+        return redirect(url_for('update_ret2'))
 
     else:
         print("going to update_ret.html")
         return render_template("update_ret.html")
-
-# When we're returning clothes, we might be returning
-# top and bottom at the same time
-# This will deal with returning 2 clothes
-# and asking for the preference
-@app.route("/ret2", methods=["POST", "GET"])
-def ret2():
-    global cur_type_of_clothes
-    global cur_color
-
-    if request.method == "POST":
-        img_file = request.form["img"]
-        # This is where we get the color and type_of_clothes
-        image = Image.open(img_file).convert("RGB")
-        temp_label, temp_color = crm.getLabels(image)
-        cur_type_of_clothes = temp_label[0][0]
-        cur_color = temp_color[0]
-        # we don't add clothes to the database here yet
-        i = db.find_index_to_add(database)
-        # sc.rotate_servo(cur_angle, i * 9)
-        return redirect(url_for('update_ret2'))
-
-    else: 
-        print("going to ret2.html")   
-        return render_template("ret2.html")
 
 @app.route("/update_ret2", methods=["POST", "GET"])
 def update_ret2():
@@ -284,25 +277,58 @@ def update_ret2():
     global cur_angle
 
     if request.method == "POST":
-        # here I will update the database
+        # get the preference for the user preference model
         preference_for_combination = request.form["nm"]
         if int(preference) < 5:
             preference = "-1"
         else:
             preference = "1"
 
-        i = db.find_index_to_add(database)
-        clothing_type = vapi.getClothingType(cur_type_of_clothes)
-        db.add_to_database(database, i, cur_type_of_clothes, cur_color, 5, clothing_type)
+        i = clothes_taken_index_list[1]
+        toc = database[i].type_of_clothes
+        col = database[i].color
+        db.return_to_database(database, i)
         cur_angle = i * 9
-        # Here we will update the combination
-        clothes_combination_string += (str(cur_color) + cur_type_of_clothes)
-        up.setRating(preference, clothes_combination_string)  
+
+        temp_tuple = ((toc, toc, toc, toc, toc, col))
+        if one_clothes == True:
+            up.setRating(preference, temp_tuple)  
+        else:
+            final_tuple = clothes_combination_tuple + temp_tuple
+            up.setRating(preference, final_tuple)  
+
         return redirect(url_for('home'))
 
     else:
         print("going to update_ret2.html")
         return render_template("update_ret2.html")
+
+# When we're returning clothes, we might be returning
+# top and bottom at the same time
+# This will deal with returning 2 clothes
+# and asking for the preference
+# @app.route("/ret2", methods=["POST", "GET"])
+# def ret2():
+#     global cur_type_of_clothes
+#     global cur_color
+
+#     if request.method == "POST":
+#         img_file = request.form["img"]
+#         # This is where we get the color and type_of_clothes
+#         image = Image.open(img_file).convert("RGB")
+#         temp_label, temp_color = crm.getLabels(image)
+#         cur_type_of_clothes = temp_label[0][0]
+#         cur_color = temp_color[0]
+#         # we don't add clothes to the database here yet
+#         i = db.find_index_to_add(database)
+#         # sc.rotate_servo(cur_angle, i * 9)
+#         return redirect(url_for('update_ret2'))
+
+#     else: 
+#         print("going to ret2.html")   
+#         return render_template("ret2.html")
+
+
 
 # I will implement checkboxes
 @app.route("/take", methods=["POST", "GET"])
