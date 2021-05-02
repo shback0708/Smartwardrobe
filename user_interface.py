@@ -50,7 +50,6 @@ global_clothes_information = []
 next_type_of_clothes = ""
 next_color = ""
 clothes_taken_index_list = []
-one_clothes = True
 
 @app.route("/")
 def index():
@@ -59,7 +58,6 @@ def index():
 @app.route("/home", methods=["POST", "GET"])
 def home():
     global clothes_taken_index_list
-    global one_clothes
     if request.method == "POST":
         type_of_action = request.form["nm"]
         print(type_of_action)
@@ -234,26 +232,14 @@ def update_remove():
 @app.route("/ret", methods=["POST", "GET"])
 def ret():
     global clothes_taken_index_list
-    global one_clothes
 
     if request.method == "POST":
 
         clothes_taken_index_list = db.find_clothes_taken(database)
         print ("clothes_taken_index_list is ")
         print (clothes_taken_index_list)
-        if len(clothes_taken_index_list) == 2:
-            print("we're returning 2 pieces of clothing")
-            one_clothes = False
-            # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
-            return redirect(url_for('update_ret'))
-        elif len(clothes_taken_index_list) == 1:
-            print("we'll only be returning 1 pieces of clothing")
-            one_clothes = True
-            # sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
-            return redirect(url_for('update_ret2'))
-        else:
-            print("the wardrobe is full you can't return anything")
-            return redirect(url_for('home'))
+        #sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
+        return redirect(url_for('update_ret'))
     
     else:
         print("going to ret.html")
@@ -268,20 +254,33 @@ def update_ret():
 
     if request.method == "POST":
 
+        # get the preference for the user preference model
+        preference = request.form["nm"]
+        if int(preference) < 5:
+            preference = "-1"
+        else:
+            preference = "1"
+
         i = clothes_taken_index_list[0]
         toc = database[i].type_of_clothes
         col = database[i].color
         db.return_to_database(database, i)
-        cur_angle = i * 9
-
+        
         clothes_combination_tuple = ((toc, toc, toc, toc, toc, col),)
 
-        # we rotate the hanger again here
-
-        # sc.rotate_servo(cur_angle, clothes_taken_index_list[1])
-
-        return redirect(url_for('update_ret2'))
-
+        if len(clothes_taken_index_list) == 2:
+            # sc.rotate_servo(cur_angle, i * 9)
+            cur_angle = i * 9
+            return redirect(url_for('update_ret2')):
+        # one clothes
+        elif len(clothes_taken_index_list) == 1:
+            cur_angle = i * 9
+            up.setRating(preference, clothes_combination_tuple)  
+            return redirect(url_for('home')):
+        else:
+            print("clothes taken index is wrong")
+            return redirect(url_for('home')):
+            
     else:
         print("going to update_ret.html")
         return render_template("update_ret.html")
@@ -306,13 +305,10 @@ def update_ret2():
         cur_angle = i * 9
 
         temp_tuple = ((toc, toc, toc, toc, toc, col),)
-        if one_clothes == True:
-            up.setRating(preference, temp_tuple)  
-        else:
-            # ("Tee", "Tee", )
-            final_tuple = clothes_combination_tuple + temp_tuple
-            print(final_tuple)
-            up.setRating(preference, final_tuple)  
+        final_tuple = clothes_combination_tuple + temp_tuple
+        up.setRating(preference, final_tuple) 
+
+        return redirect(url_for('home'))
 
         return redirect(url_for('home'))
 
