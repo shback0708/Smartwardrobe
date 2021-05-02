@@ -30,3 +30,6 @@ def rotate_servo(cur_angle, angle):
     return
 
 #rotate_servo(180)
+
+if __name__ == "__main__":
+    print("we will be starting from an empty database")
