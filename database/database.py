@@ -4,18 +4,18 @@ colorThreshold = 0.3
 # this angle will be from 0 to 180, incremented by 9 
 storage = Cache("storage")
 class clothes:
-    def __init__(self, angle, type_of_clothes, color, preference, clothing_type, taken = True):
+    def __init__(self, angle, type_of_clothes, color, preference, clothing_type, clothes_taken = True):
         self.angle = angle
         self.type_of_clothes = type_of_clothes
         # color is now a tuple 
         self.color = color
         self.preference = 0
         self.clothing_type = -1
-        self.taken = True
+        self.clothes_taken = True
 
 def init_database(database):
     for i in range(20):
-        database.append(clothes(i, "Tee", (0,0,0), 10, 0))
+        database.append(clothes(i, "Tee", (0,0,0), 10, 0, True))
 
     for i in range(20):
         if storage.get(str(i)) != None:
@@ -24,7 +24,7 @@ def init_database(database):
 
 def print_database(database):
     for clothes in database:
-        print(clothes.angle, clothes.type_of_clothes, clothes.color, clothes.preference, clothes.clothing_type, clothes.taken)
+        print(clothes.angle, clothes.type_of_clothes, clothes.color, clothes.preference, clothes.clothing_type, clothes.clothes_taken)
     return
 
 ''' 
@@ -89,7 +89,7 @@ def add_to_database(database, i, type_of_clothes, color, preference, clothing_ty
     database[i].color = color 
     database[i].preference = preference
     database[i].clothing_type = clothing_type
-    database[i].taken = False
+    database[i].clothes_taken = False
     storage[str(i)] = database[i]
     return
 
@@ -136,19 +136,19 @@ def remove_from_database(database, index):
     database[index].color = "empty..."
     database[index].preference = 0
     database[index].clothing_type = -1
-    database[index].taken = True
+    database[index].clothes_taken = True
     storage[str(index)] = database[index]
     return
 
 def take_from_database(database, index):
-    if(database[index].taken == False):
-        database[index].taken = True
+    if(database[index].clothes_taken == False):
+        database[index].clothes_taken = True
         storage[str(index)] = database[index]
         return True
     return False
 
 def return_to_database(database, index):
-    database[index].taken = False
+    database[index].clothes_taken = False
     storage[str(index)] = database[index]
 
 # final can max be 2
@@ -156,7 +156,7 @@ def find_clothes_taken(database):
     final = []
     for i in range(len(database)):
         print(database[i])
-        if ((database[i].taken == True) and (database[i].angle >= 0)):
+        if ((database[i].clothes_taken == True) and (database[i].angle >= 0)):
             final.append(i)
 
     return final
@@ -189,10 +189,10 @@ if __name__ == '__main__':
     init_database(db)
     add_to_database(db,0,"tee","red",0,1)
     add_to_database(db,1,"tee","black",0,1)
-    print(db[1].taken)
+    print(db[1].clothes_taken)
     take_from_database(db,1)
-    print(db[1].taken)
+    print(db[1].clothes_taken)
     return_to_database(db,1)
-    print(db[1].taken)
+    print(db[1].clothes_taken)
 
     #def add_to_database(database, i, type_of_clothes, color, preference, clothing_type):
