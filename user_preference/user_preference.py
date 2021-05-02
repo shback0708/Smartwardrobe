@@ -1,5 +1,6 @@
 import os
 import webcolors
+
 def setRating(p, inp):
   if not os.path.exists("fb.txt"):
     f = open("fb.txt", "w")
@@ -18,7 +19,7 @@ def setRating(p, inp):
     outfit = inp[0][0] + " " + get_colour_name(inp[0][5]) + " "
     outfit += inp[1][0] + " " + get_colour_name(inp[1][5])
   else:
-    outfit =  inp[0] + " " + get_colour_name(inp[5])
+    outfit =  inp[0][0] + " " + get_colour_name(inp[0][5])
   if(p == 1):
     outfits = like.split(",")
     if outfit not in outfits:
@@ -64,7 +65,7 @@ def getRating(inp):
     outfit = inp[0][0] + " " + get_colour_name(inp[0][5]) + " "
     outfit += inp[1][0] + " " + get_colour_name(inp[1][5])
   else:
-    outfit =  inp[0] + " " + get_colour_name(inp[5])
+    outfit =  inp[0][0] + " " + get_colour_name(inp[0][5])
 
   if(len(lines) >= 1):
     good = lines[0].split(",")
@@ -87,7 +88,7 @@ def get_colour_name(rgb_triplet):
 
 if __name__ == '__main__':
     a = (("shirt","a","b","c","d",(0,0,0)), ("pants","a","b","c","d",(0,0,0)))
-    b = (("dress","a","b","c","d",(100,0,0)))
+    b = (("dress","a","b","c","d",(100,0,0)),)
     c = (("shirt","a","b","c","d",(200,0,0)), ("pants","a","b","c","d",(100,0,0)))
     d = c = (("shirt","a","b","c","d",(300,0,0)), ("pants","a","b","c","d",(200,0,0)))
     setRating(1, a)
