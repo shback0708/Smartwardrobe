@@ -128,7 +128,7 @@ def match_color(database, color):
 def create_home_display(database):
     final = []
     for clothes in database:
-        if (clothes.angle) != 1 and (clothes.clothes_taken == False):
+        if (clothes.angle) != -1 and (clothes.clothes_taken == False):
             temp = "static/db_img/" + str(clothes.color) + clothes.type_of_clothes + ".jpeg"
             final.append(temp)
     return final

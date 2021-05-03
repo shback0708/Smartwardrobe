@@ -16,13 +16,13 @@ def setFilter(category, color, database):
     t = db.match_color(database, color)
     if(t != []):
         for cloth in t:
-            if(cloth.type_of_clothes != ""):
+            if cloth.angle != -1:
                 final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
     for i in category:
         clothes = db.match_type(database, i)
         print("clothes: ", clothes)
         for cloth in clothes:
-            if cloth not in final and cloth.clothing_type != -1 and cloth.clothes_taken != True:
+            if cloth not in final and cloth.angle != -1 and cloth.clothes_taken != True:
                 final.append((cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.type_of_clothes, cloth.color))
     return final
 
@@ -86,7 +86,7 @@ def getMatches(database, clothes):
 #returns type of clothing
 #0 for tops, 1 for bottoms, 2 for onepieces
 def getClothingType(category):
-    tops = ['Anorak', 'Blazer', 'Bomber', 'Button-Down', 'Cardigan', 'Coat', 'Flannel', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jersey', 'Parka', 'Peacoat', 'Poncho', 'Sweater',  'Tank', 'Tee', 'Top', 'Turtleneck']
+    tops = ['Anorak', 'Blazer', 'Blouse', 'Bomber', 'Button-Down', 'Cardigan', 'Coat', 'Flannel', 'Halter', 'Henley', 'Hoodie', 'Jacket', 'Jersey', 'Parka', 'Peacoat', 'Poncho', 'Sweater',  'Tank', 'Tee', 'Top', 'Turtleneck']
     bottoms = ['Capris', 'Chinos', 'Culottes', 'Cutoffs', 'Gauchos', 'Jeans', 'Jeggings', 'Jodhpurs', 'Joggers', 'Leggings', 'Sarong', 'Shorts', 'Skirt', 'Sweatpants', 'Sweatshorts', 'Trunks']
     onepieces = ['Caftan', 'Coverup', 'Dress', 'Jumpsuit', 'Kaftan', 'Kimono', 'Onesie', 'Robe', 'Romper']
     if category in tops:

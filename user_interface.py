@@ -41,7 +41,7 @@ final_color = []
 db.init_database(database)
 db.print_database(database)
 vapi = vi.VisualizerAPI()
-cc = vapi.clothingRecModel.classifier
+crm = vapi.clothingRecModel
 
 clothes_combination_tuple = ()
 clothes_option = []
@@ -82,12 +82,12 @@ def add():
         # f.save("static/db_img", f)
 
         image = Image.open(f).convert("RGB")
-        temp_label, _, temp_color = cc.getAttributes(image)
-        print(temp_label, temp_color)
-        cur_type_of_clothes = temp_label[0]
+        temp_labels, temp_colors = crm.getLabels(image)
+        print(temp_labels[0], temp_colors[0])
+        cur_type_of_clothes = temp_labels[0][0]
 
-        cur_color = temp_color
-        clothes_option = temp_label
+        cur_color = temp_colors[0]
+        clothes_option = temp_labels[0]
 
         # cur_type_of_clothes = "tshirt"
         # cur_color = "red"
@@ -271,15 +271,15 @@ def update_ret():
         if len(clothes_taken_index_list) == 2:
             # sc.rotate_servo(cur_angle, i * 9)
             cur_angle = i * 9
-            return redirect(url_for('update_ret2')):
+            return redirect(url_for('update_ret2'))
         # one clothes
         elif len(clothes_taken_index_list) == 1:
             cur_angle = i * 9
             up.setRating(preference, clothes_combination_tuple)  
-            return redirect(url_for('home')):
+            return redirect(url_for('home'))
         else:
             print("clothes taken index is wrong")
-            return redirect(url_for('home')):
+            return redirect(url_for('home'))
             
     else:
         print("going to update_ret.html")
