@@ -271,15 +271,15 @@ def update_ret():
         if len(clothes_taken_index_list) == 2:
             # sc.rotate_servo(cur_angle, i * 9)
             cur_angle = i * 9
-            return redirect(url_for('update_ret2')):
+            return redirect(url_for('update_ret2'))
         # one clothes
         elif len(clothes_taken_index_list) == 1:
             cur_angle = i * 9
             up.setRating(preference, clothes_combination_tuple)  
-            return redirect(url_for('home')):
+            return redirect(url_for('home'))
         else:
             print("clothes taken index is wrong")
-            return redirect(url_for('home')):
+            return redirect(url_for('home'))
             
     else:
         print("going to update_ret.html")
