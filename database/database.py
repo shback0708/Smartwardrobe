@@ -1,4 +1,4 @@
-from diskcache import Cache
+#from diskcache import Cache
 
 colorThreshold = 0.3
 # this angle will be from 0 to 180, incremented by 9 
@@ -9,14 +9,12 @@ class clothes:
         self.type_of_clothes = type_of_clothes
         # color is now a tuple 
         self.color = color
-        self.preference = 0
-        self.clothing_type = -1
+        self.preference = preference
+        self.clothing_type = clothing_type
         self.clothes_taken = clothes_taken
 
+# init database will just grab database info from disk
 def init_database(database):
-    for i in range(20):
-        database.append(clothes(-1, "", (0,0,0), 10, 0, True))
-
     for i in range(20):
         if storage.get(str(i)) != None:
             database[i] = storage.get(str(i))
@@ -37,7 +35,7 @@ def print_database(database):
 6 -> [4, 1]
 continued on like this trend
 '''
-def convert_index_to_coordinate(index):
+def convert_angle_index_to_coordinate(index):
     x = 0
     y = 0
     if index <= 10:
@@ -57,17 +55,16 @@ def convert_index_to_coordinate(index):
 
     return [x,y]
 
-def find_index_to_add(database):
+def find_angle_to_add(database):
     #find the center of mass in the database
     com = [0,0]
-    temp = []
+    temp = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     for i in range(len(database)):
-        if database[i].angle != -1:
-            [x,y] = convert_index_to_coordinate(i)
-            com[0] += x
-            com[1] += y
-        else:
-            temp += [i]
+        angle_index = database[i].angle // 9
+        [x,y] = convert_angle_index_to_coordinate(angle_index)
+        com[0] += x
+        com[1] += y
+        temp.remove(angle_index)
     
     # now we have center of mass
     # we will go through temp, find coordinate of index furthest from temp
@@ -75,25 +72,21 @@ def find_index_to_add(database):
     max_dist = 0
     max_index = 0
     for i in temp:
-        [x_temp, y_temp] = convert_index_to_coordinate(i)
+        [x_temp, y_temp] = convert_angle_index_to_coordinate(i)
         dist = ((com[0] - x_temp) ** 2) + ((com[1] - y_temp) **2)
         if dist > max_dist:
             max_dist = dist
             max_index = i
 
-    return max_index
+    # This will be the angle to add
+    return max_index * 9
 
-def add_to_database(database, i, type_of_clothes, color, preference, clothing_type):
-    database[i].angle = i * 9
-    database[i].type_of_clothes = type_of_clothes
-    database[i].color = color 
-    database[i].preference = preference
-    database[i].clothing_type = clothing_type
-    database[i].clothes_taken = False
-    storage[str(i)] = database[i]
+def add_to_database(database, angle, type_of_clothes, color, preference, clothing_type):
+    database.append(clothes(angle, type_of_clothes, color, preference, clothing_type))
+    storage[str(len(database)-1)] = database[len(database)-1]
     return
 
-def find_clothes_index(database, type_of_clothes, color):
+def find_clothes_angle(database, type_of_clothes, color):
     print(type_of_clothes, color)
     print("type of clothes is :" + type_of_clothes)
     print ("color is")
@@ -101,15 +94,8 @@ def find_clothes_index(database, type_of_clothes, color):
     for i in range(len(database)):
         #if ((database[i].type_of_clothes == type_of_clothes) and (colorError(database[i].color, color) <= colorThreshold)):
         if ((database[i].type_of_clothes == type_of_clothes) and (database[i].color == color)):
-            return i
+            return database[i].angle
     return -1
-
-def match_type_or_color(database, type_of_clothes, color):
-    final = []
-    for i in range(len(database)):
-        if ((database[i].type_of_clothes == type_of_clothes) or (colorError(database[i].color, color) <= colorThreshold)):
-            final.append(database[i])
-    return final
 
 def match_type(database, type_of_clothes):
     final = []
@@ -133,21 +119,28 @@ def create_home_display(database):
             final.append(temp)
     return final
 
-def remove_from_database(database, index):
-    database[index].angle = -1
-    database[index].type_of_clothes = "clothes is removed"
-    database[index].color = "empty..."
-    database[index].preference = 0
-    database[index].clothing_type = -1
-    database[index].clothes_taken = True
-    storage[str(index)] = database[index]
+def remove_from_database(database, angle):
+    # find the index of where the angle is and then pop that from database
+    for i in range(len(database)):
+        if database[i].angle == angle:
+            database.pop(i)
+            break
+
+    # we store the entire database back in storage
+    for i in range(len(database)):  
+        storage[str(i)] = database[i]
     return
 
-def take_from_database(database, index):
-    if(database[index].clothes_taken == False):
-        database[index].clothes_taken = True
-        storage[str(index)] = database[index]
-        return True
+def take_from_database(database, angle):
+    for i in range(len(database)):
+        if database[i].angle == angle:
+            if(database[i].clothes_taken == False):
+                database[index].clothes_taken = True
+                storage[str(i)] = database[i]
+                return True
+            else:
+                print("This clothes is already taken")
+                return False
     return False
 
 def return_to_database(database, index):
@@ -163,6 +156,9 @@ def find_clothes_taken(database):
             final.append(i)
 
     return final
+
+
+
 
 
 def colorError(c1, c2):
@@ -189,9 +185,9 @@ def convert_string_to_tuple(input):
 
 if __name__ == '__main__':
     db = []
-    init_database(db)
+    #init_database(db)
     add_to_database(db,0,"tee","red",0,1)
-    add_to_database(db,1,"tee","black",0,1)
+    add_to_database(db,9,"tee","black",0,1)
     print(db[1].clothes_taken)
     take_from_database(db,1)
     print(db[1].clothes_taken)

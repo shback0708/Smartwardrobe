@@ -128,8 +128,8 @@ def confirm_add():
             cur_type_of_clothes = temp[0]
 
         # we don't add clothes to the database here yet
-        i = db.find_index_to_add(database)
-        # sc.rotate_servo(cur_angle, i * 9)
+        angle = db.find_angle_to_add(database)
+        # sc.rotate_servo(cur_angle, angle)
         return redirect(url_for('update_add'))
 
     else: 
@@ -149,11 +149,11 @@ def update_add():
             preference = "-1"
         else:
             preference = "1"
-        i = db.find_index_to_add(database)
+        angle = db.find_angle_to_add(database)
         print("cur_type: ", cur_type_of_clothes)
         clothing_type = vi.VisualizerAPI.getClothingType(cur_type_of_clothes)
-        db.add_to_database(database, i, cur_type_of_clothes, cur_color, preference, clothing_type)
-        cur_angle = i * 9
+        db.add_to_database(database, angle, cur_type_of_clothes, cur_color, preference, clothing_type)
+        cur_angle = angle
         return redirect(url_for('home'))
 
     else:
@@ -177,9 +177,9 @@ def remove():
         cur_type_of_clothes = temp[0][split_index + 2:]
 
         print("cur type of clothes is" + cur_type_of_clothes)
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        if i != -1:
-            # sc.rotate_servo(cur_angle, i * 9)
+        angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+        if angle != -1:
+            # sc.rotate_servo(cur_angle, angle)
             return redirect(url_for('update_remove'))
         else:
             print ("couldn't find the clothes for some reason")
@@ -195,37 +195,17 @@ def update_remove():
     global cur_angle
     if request.method == "POST":
         # here I will update the database
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        db.remove_from_database(database, i)
-        cur_angle = i * 9
+        angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+        if angle != -1:
+            db.remove_from_database(database, i)
+            cur_angle = angle
+        else:
+            print("this clothes can't be found from database")
         return redirect(url_for('home'))
 
     else:
         print("going to update_remove.html")
         return render_template("update_remove.html")
-
-# This will be same as add except, we will redirect to 
-# 1 additional page, which will require user feedback of clothes
-# @app.route("/ret", methods=["POST", "GET"])
-# def ret():
-#     global cur_type_of_clothes
-#     global cur_color
-
-#     if request.method == "POST":
-#         img_file = request.files["img"]
-#         # This is where we get the color and type_of_clothes
-#         image = Image.open(img_file).convert("RGB")
-#         temp_label, _, temp_color = cc.getAttributes(image)
-#         cur_type_of_clothes = temp_label[0]
-#         cur_color = temp_color[0]
-#         # we don't add clothes to the database here yet
-#         i = db.find_index_to_add(database)
-#         # sc.rotate_servo(cur_angle, i * 9)
-#         return redirect(url_for('update_ret'))
-
-#     else: 
-#         print("going to ret.html")   
-#         return render_template("ret.html")
 
 # changed the entire return function so that we will be returning the clothes 
 # we took 
@@ -268,13 +248,15 @@ def update_ret():
         
         clothes_combination_tuple = ((toc, toc, toc, toc, toc, col),)
 
+        angle = database[i].angle
+
         if len(clothes_taken_index_list) == 2:
-            # sc.rotate_servo(cur_angle, i * 9)
-            cur_angle = i * 9
+            # sc.rotate_servo(cur_angle, angle)
+            cur_angle = angle
             return redirect(url_for('update_ret2'))
         # one clothes
         elif len(clothes_taken_index_list) == 1:
-            cur_angle = i * 9
+            cur_angle = angle
             up.setRating(preference, clothes_combination_tuple)  
             return redirect(url_for('home'))
         else:
@@ -302,7 +284,9 @@ def update_ret2():
         toc = database[i].type_of_clothes
         col = database[i].color
         db.return_to_database(database, i)
-        cur_angle = i * 9
+
+        angle = database[i].angle
+        cur_angle = angle
 
         temp_tuple = ((toc, toc, toc, toc, toc, col),)
         final_tuple = clothes_combination_tuple + temp_tuple
@@ -315,33 +299,6 @@ def update_ret2():
     else:
         print("going to update_ret2.html")
         return render_template("update_ret2.html")
-
-# When we're returning clothes, we might be returning
-# top and bottom at the same time
-# This will deal with returning 2 clothes
-# and asking for the preference
-# @app.route("/ret2", methods=["POST", "GET"])
-# def ret2():
-#     global cur_type_of_clothes
-#     global cur_color
-
-#     if request.method == "POST":
-#         img_file = request.form["img"]
-#         # This is where we get the color and type_of_clothes
-#         image = Image.open(img_file).convert("RGB")
-#         temp_label, temp_color = crm.getLabels(image)
-#         cur_type_of_clothes = temp_label[0][0]
-#         cur_color = temp_color[0]
-#         # we don't add clothes to the database here yet
-#         i = db.find_index_to_add(database)
-#         # sc.rotate_servo(cur_angle, i * 9)
-#         return redirect(url_for('update_ret2'))
-
-#     else: 
-#         print("going to ret2.html")   
-#         return render_template("ret2.html")
-
-
 
 # I will implement checkboxes
 @app.route("/take", methods=["POST", "GET"])
@@ -396,9 +353,9 @@ def show_take():
             next_type_of_clothes = temp_combination[1][0]
             next_color = temp_combination[1][5]
 
-            i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-            if i != -1:
-                # sc.rotate_servo(cur_angle, i * 9)
+            angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+            if angle != -1:
+                # sc.rotate_servo(cur_angle, angle)
                 return redirect(url_for('update_take'))
             else:
                 print ("couldn't find the clothes for 2 clothes (top) for some reason")
@@ -408,9 +365,9 @@ def show_take():
             # it will be a one piece clothing
             cur_type_of_clothes = temp_combination[0][0]
             cur_color = temp_combination[0][5]
-            i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-            if i != -1:
-                # sc.rotate_servo(cur_angle, i * 9)
+            angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+            if angle != -1:
+                # sc.rotate_servo(cur_angle, angle)
                 return redirect(url_for('update_take2'))
             else:
                 print ("couldn't find the clothes for one piece of clothing for some reason")
@@ -451,15 +408,15 @@ def update_take():
     global cur_color
     if request.method == "POST":
         # here I will update the database
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        db.take_from_database(database, i)
-        cur_angle = i * 9
+        angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+        db.take_from_database(database, angle)
+        cur_angle = angle
         cur_type_of_clothes = next_type_of_clothes
         cur_color = next_color
 
-        j = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        if j != -1:
-            # sc.rotate_servo(cur_angle, j * 9)
+        angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+        if angle != -1:
+            # sc.rotate_servo(cur_angle, angle)
             return redirect(url_for('update_take2'))
         else:
             print ("couldn't find the clothes for the bottom clothing for some reason")
@@ -477,9 +434,9 @@ def update_take2():
     global cur_angle
     if request.method == "POST":
         # here I will update the database
-        i = db.find_clothes_index(database, cur_type_of_clothes, cur_color)
-        db.take_from_database(database, i)
-        cur_angle = i * 9
+        angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
+        db.take_from_database(database, angle)
+        cur_angle = angle
         return redirect(url_for('home'))
 
     else:
