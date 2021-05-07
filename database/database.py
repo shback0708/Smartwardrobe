@@ -15,9 +15,9 @@ class clothes:
 
 # init database will just grab database info from disk
 def init_database(database):
-    for i in range(20):
-        if storage.get(str(i)) != None:
-            database[i] = storage.get(str(i))
+    temp = list(storage)
+    for i in range(len(temp)):
+        database.append(storage.get(temp[i]))
     return
 
 def print_database(database):
@@ -86,7 +86,7 @@ def add_to_database(database, angle, type_of_clothes, color, preference, clothin
         if(database[i].angle == angle):
             raise Exception("Angle already exists")
     database.append(clothes(angle, type_of_clothes, color, preference, clothing_type))
-    storage[str(len(database)-1)] = database[len(database)-1]
+    storage[str(angle)] = database[len(database)-1]
     return
 
 def find_clothes_angle(database, type_of_clothes, color):
@@ -127,13 +127,12 @@ def remove_from_database(database, angle):
     found = False
     for i in range(len(database)):
         if database[i].angle == angle:
+            del storage[str(database[i].angle)]
             database.pop(i)
             found = True
             break
 
     # we store the entire database back in storage
-    for i in range(len(database)):  
-        storage[str(i)] = database[i]
     if(found == False):
         raise Exception("No clothes to remove found at that angle")
     return
@@ -144,7 +143,7 @@ def take_from_database(database, angle):
         if database[i].angle == angle:
             if(database[i].clothes_taken == False):
                 database[i].clothes_taken = True
-                storage[str(i)] = database[i]
+                storage[str(database[i].angle)] = database[i]
                 return True
             else:
                 print("This clothes is already taken")
@@ -156,7 +155,7 @@ def return_to_database(database, index):
     if(index > len(database) - 1):
         raise Exception("Index larger than database")
     database[index].clothes_taken = False
-    storage[str(index)] = database[index]
+    storage[str(database[index].angle)] = database[index]
 
 # final can max be 2
 def find_clothes_taken(database):
@@ -196,7 +195,8 @@ def convert_string_to_tuple(input):
 
 if __name__ == '__main__':
     db = []
-    #init_database(db)
+    init_database(db)
+    #storage.clear()
     add_to_database(db,0,"tee","red",0,1)
     add_to_database(db,9,"tee","black",0,1)
     add_to_database(db,18,"jeans","black",0,2)
@@ -212,6 +212,7 @@ if __name__ == '__main__':
     #return_to_database(db,15)
     print(db[1].clothes_taken)
     remove_from_database(db,9)
+    print(list(storage))
     print(len(db))
     print_database(db)
     #remove_from_database(db,5)
@@ -220,7 +221,7 @@ if __name__ == '__main__':
     print(len(db))
     add_to_database(db,18,"jeans","black",0,2)
     #add_to_database(db,18,"jeans","blue",0,2)
-    print(len(db))
+    # print(len(db))
     print_database(db)
 
     #def add_to_database(database, i, type_of_clothes, color, preference, clothing_type):
