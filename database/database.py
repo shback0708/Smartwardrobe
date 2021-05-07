@@ -1,4 +1,4 @@
-#from diskcache import Cache
+from diskcache import Cache
 
 colorThreshold = 0.3
 # this angle will be from 0 to 180, incremented by 9 
@@ -82,6 +82,9 @@ def find_angle_to_add(database):
     return max_index * 9
 
 def add_to_database(database, angle, type_of_clothes, color, preference, clothing_type):
+    for i in range(len(database)):
+        if(database[i].angle == angle):
+            raise Exception("Angle already exists")
     database.append(clothes(angle, type_of_clothes, color, preference, clothing_type))
     storage[str(len(database)-1)] = database[len(database)-1]
     return
@@ -121,29 +124,37 @@ def create_home_display(database):
 
 def remove_from_database(database, angle):
     # find the index of where the angle is and then pop that from database
+    found = False
     for i in range(len(database)):
         if database[i].angle == angle:
             database.pop(i)
+            found = True
             break
 
     # we store the entire database back in storage
     for i in range(len(database)):  
         storage[str(i)] = database[i]
+    if(found == False):
+        raise Exception("No clothes to remove found at that angle")
     return
 
 def take_from_database(database, angle):
+    found = False
     for i in range(len(database)):
         if database[i].angle == angle:
             if(database[i].clothes_taken == False):
-                database[index].clothes_taken = True
+                database[i].clothes_taken = True
                 storage[str(i)] = database[i]
                 return True
             else:
                 print("This clothes is already taken")
                 return False
+    raise Exception("No clothes to take found at that angle")
     return False
 
 def return_to_database(database, index):
+    if(index > len(database) - 1):
+        raise Exception("Index larger than database")
     database[index].clothes_taken = False
     storage[str(index)] = database[index]
 
@@ -188,10 +199,28 @@ if __name__ == '__main__':
     #init_database(db)
     add_to_database(db,0,"tee","red",0,1)
     add_to_database(db,9,"tee","black",0,1)
+    add_to_database(db,18,"jeans","black",0,2)
+    add_to_database(db,27,"slacks","blue",0,2)
+    add_to_database(db,36,"dress","black",0,3)
+    add_to_database(db,45,"blouse","black",0,1)
+    print_database(db)
     print(db[1].clothes_taken)
-    take_from_database(db,1)
+    take_from_database(db,9)
     print(db[1].clothes_taken)
+    take_from_database(db,9)
     return_to_database(db,1)
+    #return_to_database(db,15)
     print(db[1].clothes_taken)
+    remove_from_database(db,9)
+    print(len(db))
+    print_database(db)
+    #remove_from_database(db,5)
+    remove_from_database(db,18)
+    remove_from_database(db,27)
+    print(len(db))
+    add_to_database(db,18,"jeans","black",0,2)
+    #add_to_database(db,18,"jeans","blue",0,2)
+    print(len(db))
+    print_database(db)
 
     #def add_to_database(database, i, type_of_clothes, color, preference, clothing_type):
