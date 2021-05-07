@@ -197,7 +197,7 @@ def update_remove():
         # here I will update the database
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         if angle != -1:
-            db.remove_from_database(database, i)
+            db.remove_from_database(database, angle)
             cur_angle = angle
         else:
             print("this clothes can't be found from database")

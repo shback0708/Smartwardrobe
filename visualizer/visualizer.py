@@ -19,7 +19,7 @@ class VisualizerAPI:
     imageStorage = None
     clothingRecModel = None
     webScraper = None
-    correctness_threshold = 0.4
+    correctness_threshold = 0.5
     def __init__(self):
         t0 = time.time()
         self.clothingRecModel = cr.ClothingRecognitionModel()
@@ -71,7 +71,7 @@ class VisualizerAPI:
         for i, category in enumerate(label1):
             if category in label2:
                 correctness += 0.5 ** (i + 1)
-        correctness -= VisualizerAPI.colorError(color1, color2) / 10
+        correctness -= VisualizerAPI.colorError(color1, color2) * 0.3
         return correctness
 
     # returns 0 if its a top, 1 if its a bottom, or 2 if its a one-piece
