@@ -19,7 +19,7 @@ class VisualizerAPI:
     imageStorage = None
     clothingRecModel = None
     webScraper = None
-    correctness_threshold = 0.5
+    correctness_threshold = 0.4
     def __init__(self):
         t0 = time.time()
         self.clothingRecModel = cr.ClothingRecognitionModel()

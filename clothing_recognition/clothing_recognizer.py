@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__),'classifier'))
 from detector import clothing_detector as cd
 from classifier import clothing_classifier as cc
 
+margin = 0.2
 # finds an returns num outfit images that best fit given labels online
 class ClothingRecognitionModel:
     detector = None
@@ -29,6 +30,10 @@ class ClothingRecognitionModel:
             scores = detections['detection_scores'][0].numpy()
             for i in range(3):
                 ymin,xmin,ymax,xmax = bboxes[i]
+                ymin = min(ymin-margin,0)
+                xmin = min(xmin-margin,0)
+                ymax = max(ymax+margin,1)
+                xmax = max(xmax+margin,1)
                 im_width, im_height = image.size
                 dimensions = (min(xmin * im_width, im_width), 
                             min(ymin * im_height, im_height),

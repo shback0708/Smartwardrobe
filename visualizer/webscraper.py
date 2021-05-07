@@ -23,7 +23,7 @@ class WebScraper:
     limit = num
     query = ""
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument('--ignore-certificate-errors')
     chrome_options.add_argument('--ignore-ssl-errors')
     driver = webdriver.Chrome(path, options = chrome_options)
