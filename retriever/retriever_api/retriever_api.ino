@@ -6,6 +6,7 @@ int default_angle = 90;
 String inBytes;
 int angle = 0;
 int new_angle;
+int incoming;
 
 void setup() {
   servo_test.attach(9);
@@ -13,16 +14,19 @@ void setup() {
   while (!Serial); // wait until Serial is ready
   delay(100);
   servo_test.write(angle);
+  Serial.println(angle);
   //Serial.println("setup complete");
 }
 
 void loop() {
   if (Serial.available() > 0) {
-    inBytes = Serial.readStringUntil('\n');
-    new_angle = inBytes.toInt();
-    servo_test.write(new_angle);
-    delay(2000);
-    Serial.println(inBytes);
+    //inBytes = Serial.readStringUntil('\n');
+    incoming = Serial.read();
+    //new_angle = inBytes.toInt();
+    // convert byte to integer 
+    servo_test.write(incoming);
+    //delay(2000);
+    Serial.println(incoming);
     
 //    if (inBytes == "open") {
 //      servo_test.write(180);

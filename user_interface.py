@@ -10,13 +10,14 @@ from flask_nav import Nav
 from flask_nav.elements import Navbar, Subgroup, View, Link, Text, Separator
 import database.database as db
 import matching as matching
-# import retriever.servo_control as sc
+import retriever.servo_control as sc
 import time
-# import serial
+import serial
 from PIL import Image
-import visualizer.visualizer as vi
-# import fakeapi as vi
+#import visualizer.visualizer as vi
+import fakeapi as vi
 import user_preference.user_preference as up
+from diskcache import Cache
 
 app = Flask(__name__)
 nav = Nav(app)
@@ -29,8 +30,15 @@ View('Return', 'ret'),
 View('Take', 'take')
 ))
 
+
+serialcomm = serial.Serial('/dev/cu.usbmodem101', 9600)
+
 database = []
-cur_angle = 0
+angle_storage = Cache("angle_storage")
+angle_key = "cur_angle"
+servo_angle = angle_storage.get(angle_key)
+if servo_angle == None:
+    servo_angle = 0
 cur_type_of_clothes = ""
 cur_color = ""
 class_lookup = ["Anorak", "Blazer", "Blouse", "Bomber", "Button-Down", "Caftan", "Capris", "Cardigan", "Chinos", "Coat, Coverup", "Culottes", "Cutoffs", "Dress", "Flannel", "Gauchos", "Halter", "Henley", "Hoodie", "Jacket", "Jeans", "Jeggings", "Jersey", "Jodhurs", "Joggers", "Jumpsuit", "Kaftan", "Kimono", "Leggings", "Onesie", "Parka", "Peacoat", "Poncho", "Robe", "Romper", "Sarong", "Shorts", "Skirt", "Sweater", "Sweatpants", "Sweatshorts", "Tank", "Tee", "Top", "Trunks", "Turtleneck"]
@@ -51,6 +59,18 @@ next_type_of_clothes = ""
 next_color = ""
 clothes_taken_index_list = []
 
+def setCurAngle(new_angle):
+    global servo_angle
+    global serialcomm
+    global angle_storage
+    sc.rotate_servo(serialcomm, servo_angle, new_angle)
+    servo_angle = new_angle
+    angle_storage[angle_key] = new_angle
+    
+def getCurAngle():
+    global servo_angle
+    return servo_angle
+
 @app.route("/")
 def index():
     return redirect(url_for('home'))
@@ -67,7 +87,9 @@ def home():
         # need to make the array of inside_db_img
         imgs = db.create_home_display(database)
         print(imgs)
+        print("cur_angle is " + str(getCurAngle()))
         #imgs = ["(0, 0, 0)Tee.jpeg", "(255, 0, 0)Jeans.jpeg"]
+        db.print_database(database)
         return render_template("home.html", imgs = imgs)
 
 @app.route("/add", methods=["POST", "GET"])
@@ -129,7 +151,8 @@ def confirm_add():
 
         # we don't add clothes to the database here yet
         angle = db.find_angle_to_add(database)
-        # sc.rotate_servo(cur_angle, angle)
+        # this will be the rotation
+        setCurAngle(angle)
         return redirect(url_for('update_add'))
 
     else: 
@@ -140,7 +163,6 @@ def confirm_add():
 @app.route("/update_add", methods=["POST", "GET"])
 def update_add():
     global database
-    global cur_angle
 
     if request.method == "POST":
         # here I will update the database
@@ -153,7 +175,6 @@ def update_add():
         print("cur_type: ", cur_type_of_clothes)
         clothing_type = vi.VisualizerAPI.getClothingType(cur_type_of_clothes)
         db.add_to_database(database, angle, cur_type_of_clothes, cur_color, preference, clothing_type)
-        cur_angle = angle
         return redirect(url_for('home'))
 
     else:
@@ -179,7 +200,7 @@ def remove():
         print("cur type of clothes is" + cur_type_of_clothes)
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         if angle != -1:
-            # sc.rotate_servo(cur_angle, angle)
+            setCurAngle(angle)
             return redirect(url_for('update_remove'))
         else:
             print ("couldn't find the clothes for some reason")
@@ -192,13 +213,11 @@ def remove():
 @app.route("/update_remove", methods=["POST", "GET"])
 def update_remove():
     global database
-    global cur_angle
     if request.method == "POST":
         # here I will update the database
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         if angle != -1:
             db.remove_from_database(database, angle)
-            cur_angle = angle
         else:
             print("this clothes can't be found from database")
         return redirect(url_for('home'))
@@ -218,7 +237,7 @@ def ret():
         clothes_taken_index_list = db.find_clothes_taken(database)
         print ("clothes_taken_index_list is ")
         print (clothes_taken_index_list)
-        #sc.rotate_servo(cur_angle, clothes_taken_index_list[0])
+        setCurAngle(clothes_taken_index_list[0])
         return redirect(url_for('update_ret'))
     
     else:
@@ -229,7 +248,6 @@ def ret():
 @app.route("/update_ret", methods=["POST", "GET"])
 def update_ret():
     global database
-    global cur_angle
     global clothes_combination_tuple
 
     if request.method == "POST":
@@ -248,15 +266,14 @@ def update_ret():
         
         clothes_combination_tuple = ((toc, toc, toc, toc, toc, col),)
 
-        angle = database[i].angle
+
+        angle = database[clothes_taken_index_list[1]].angle
 
         if len(clothes_taken_index_list) == 2:
-            # sc.rotate_servo(cur_angle, angle)
-            cur_angle = angle
+            setCurAngle(angle)
             return redirect(url_for('update_ret2'))
         # one clothes
         elif len(clothes_taken_index_list) == 1:
-            cur_angle = angle
             up.setRating(preference, clothes_combination_tuple)  
             return redirect(url_for('home'))
         else:
@@ -270,7 +287,6 @@ def update_ret():
 @app.route("/update_ret2", methods=["POST", "GET"])
 def update_ret2():
     global database
-    global cur_angle
 
     if request.method == "POST":
         # get the preference for the user preference model
@@ -285,14 +301,9 @@ def update_ret2():
         col = database[i].color
         db.return_to_database(database, i)
 
-        angle = database[i].angle
-        cur_angle = angle
-
         temp_tuple = ((toc, toc, toc, toc, toc, col),)
         final_tuple = clothes_combination_tuple + temp_tuple
         up.setRating(preference, final_tuple) 
-
-        return redirect(url_for('home'))
 
         return redirect(url_for('home'))
 
@@ -355,7 +366,7 @@ def show_take():
 
             angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
             if angle != -1:
-                # sc.rotate_servo(cur_angle, angle)
+                setCurAngle(angle)
                 return redirect(url_for('update_take'))
             else:
                 print ("couldn't find the clothes for 2 clothes (top) for some reason")
@@ -367,7 +378,7 @@ def show_take():
             cur_color = temp_combination[0][5]
             angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
             if angle != -1:
-                # sc.rotate_servo(cur_angle, angle)
+                setCurAngle(angle)
                 return redirect(url_for('update_take2'))
             else:
                 print ("couldn't find the clothes for one piece of clothing for some reason")
@@ -403,20 +414,18 @@ def show_take():
 @app.route("/update_take", methods=["POST", "GET"])
 def update_take():
     global database
-    global cur_angle
     global cur_type_of_clothes
     global cur_color
     if request.method == "POST":
         # here I will update the database
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         db.take_from_database(database, angle)
-        cur_angle = angle
         cur_type_of_clothes = next_type_of_clothes
         cur_color = next_color
 
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         if angle != -1:
-            # sc.rotate_servo(cur_angle, angle)
+            setCurAngle(angle)
             return redirect(url_for('update_take2'))
         else:
             print ("couldn't find the clothes for the bottom clothing for some reason")
@@ -431,12 +440,10 @@ def update_take():
 @app.route("/update_take2", methods=["POST", "GET"])
 def update_take2():
     global database
-    global cur_angle
     if request.method == "POST":
         # here I will update the database
         angle = db.find_clothes_angle(database, cur_type_of_clothes, cur_color)
         db.take_from_database(database, angle)
-        cur_angle = angle
         return redirect(url_for('home'))
 
     else:
@@ -444,5 +451,4 @@ def update_take2():
         return render_template("update_take2.html")
 
 if __name__ == "__main__":
-    #serialcomm = serial.Serial('/dev/cu.usbmodem1101', 9600)
     app.run(debug=True)

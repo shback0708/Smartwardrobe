@@ -16,6 +16,9 @@ class ClothingRecModel:
     def __init__(self):
         classifier = Classifier()
     
+    def getLabels(self, clothes):
+        return ([["Tee", "Jacket", "Blazer", "Dress", "Jeans"], ["Jacket"]], [(0,0,0)])
+    
 class VisualizerAPI:
 
     clothingRecModel = ClothingRecModel()
@@ -35,5 +38,5 @@ class VisualizerAPI:
             raise Exception("unknown clothing type: " + category)
 
     def getOutfitImgs(self, label, num):
-        image = Image.open("00171615.jpg")
+        image = Image.open("static/take_img/0.jpg")
         return [image for i in range(num)]
