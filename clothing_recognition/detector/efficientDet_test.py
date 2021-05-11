@@ -1,5 +1,4 @@
 import matplotlib
-matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 
 import glob
@@ -42,7 +41,7 @@ def load_image_into_numpy_array(path):
 
 import pathlib
 
-filenames = list(pathlib.Path('training/').glob('*.index'))
+filenames = list(pathlib.Path('models/').glob('*.index'))
 
 filenames.sort()
 print(filenames)
@@ -93,9 +92,9 @@ label_map_dict = label_map_util.get_label_map_dict(label_map, use_display_name=T
 #it takes a little longer on the first run and then runs at normal speed. 
 import random
 
-TEST_IMAGE_PATHS = glob.glob('test/img/test.jpg')
-image_path = random.choice(TEST_IMAGE_PATHS)
-image_np = load_image_into_numpy_array(image_path)
+# TEST_IMAGE_PATHS = glob.glob('test.jpg')
+# image_path = random.choice(TEST_IMAGE_PATHS)
+image_np = load_image_into_numpy_array('C:/Users\linhe\OneDrive\Documents\GitHub\Smartwardrobe\clothing_recognition/test.jpg')
 
 # Things to try:
 # Flip horizontally
@@ -118,11 +117,11 @@ viz_utils.visualize_boxes_and_labels_on_image_array(
       detections['detection_scores'][0].numpy(),
       category_index,
       use_normalized_coordinates=True,
-      max_boxes_to_draw=10,
+      max_boxes_to_draw=2,
       min_score_thresh=0.4,
       agnostic_mode=False,
 )
 
 plt.figure(figsize=(12,16))
 plt.imshow(image_np_with_detections)
-plt.savefig('test.png')
+plt.savefig('C:/Users\linhe\OneDrive\Documents\GitHub\Smartwardrobe\clothing_recognition/res.jpg')
